@@ -1,1 +1,22 @@
-[]
+[
+  {
+    "id": 1,
+    "name": "Tomato Egg Stir-fry",
+    "cuisine": "chinese",
+    "spice_level": 0,
+    "flavor": "savory",
+    "time_minutes": 15,
+    "estimated_price": 3.0,
+    "ingredients": ["tomato", "egg", "green_onion", "vegetable_oil", "salt", "sugar", "rice"]
+  },
+  {
+    "id": 2,
+    "name": "Stovetop Mac and Cheese",
+    "cuisine": "western",
+    "spice_level": 0,
+    "flavor": "savory",
+    "time_minutes": 25,
+    "estimated_price": 3.5,
+    "ingredients": ["pasta", "cheese", "milk", "butter", "flour", "salt", "black_pepper"]
+  }
+]

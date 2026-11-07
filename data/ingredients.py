@@ -26,6 +26,39 @@ ALL_TAGS = [
     "beef",
 ]
 
+# Fixed cuisine list. Recipe "cuisine" and preference "cuisines" may only use these values.
+# Rule: all lowercase, multiple words joined with underscores.
+# "western" = everyday home cooking from Canada, the US and the UK
+# (e.g. mac and cheese, grilled cheese, pancakes, chili, burgers, roast potatoes).
+CUISINES = [
+    "chinese",
+    "japanese",
+    "korean",
+    "indian",
+    "italian",
+    "mexican",
+    "vietnamese",
+    "western",
+]
+
+# Spice levels. Recipe "spice_level" must be one of these keys.
+# The user picks the highest level they accept (single choice).
+SPICE_LEVELS = {
+    0: "none",
+    1: "mild",
+    2: "medium",
+    3: "hot",
+}
+
+# Tastes. Recipe "flavor" must be one of these values.
+# The user picks the tastes they like (multiple choice), stored as a list in preference "flavor".
+TASTES = [
+    "savory",
+    "sweet",
+    "sour",
+    "mild",
+]
+
 
 def _item(display_name, category, shelf_days, tags=None, aliases=None):
     """Build one ingredient entry in the data-contract shape."""

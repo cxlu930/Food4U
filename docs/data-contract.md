@@ -35,20 +35,42 @@ INGREDIENTS = {
   `soy`, `wheat`, `dairy`, `egg`, `peanut`, `tree_nut`, `sesame`, `shellfish`,
   `fish`, `meat`, `pork`, `beef` (same as `ALL_TAGS` in `data/ingredients.py`).
 
+## 1b. CUISINES (`data/ingredients.py`, owner: B)
+
+Fixed list. Recipe `cuisine` and preference `cuisines` may only use these values:
+`chinese`, `japanese`, `korean`, `indian`, `italian`, `mexican`, `vietnamese`, `western`
+(same as `CUISINES` in `data/ingredients.py`).
+
+- Naming rule: all lowercase, multiple words joined with underscores.
+- `western` = everyday home cooking from Canada, the US and the UK
+  (e.g. mac and cheese, grilled cheese, pancakes, chili, burgers, roast potatoes).
+- The preferences page lets the user pick cuisines with a multiselect built from `CUISINES`.
+- B compares cuisines with `normalize_cuisine()` in `services/recommender.py`
+  (lowercase, spaces to underscores, then check against `CUISINES`).
+- Extend only by agreement.
+
 ## 2. Preferences (A writes, B reads)
 
 ```python
 {
     "weekly_budget": 60.0,                 # float, in dollars
-    "cuisines": ["chinese", "japanese"],   # list of lowercase strings
-    "spice_level": 2,                      # int: 0 none, 1 mild, 2 medium, 3 hot (max the user accepts)
-    "flavor": "savory",                    # "sweet" | "savory" | "no_preference"
+    "cuisines": ["chinese", "japanese"],   # values from CUISINES, chosen with a multiselect
+    "spice_level": 2,                      # int key of SPICE_LEVELS: the highest level the user accepts (single choice)
+    "flavor": ["savory", "sour"],          # list of TASTES the user likes (multiple choice), [] = no preference
     "avoid_tags": ["peanut", "dairy"],     # allergies and dietary restrictions, values from the tag list above
 }
 ```
 
 Dietary restrictions map to tags: vegetarian = `meat` (plus `fish`, `shellfish` if wanted),
 no pork = `pork`, no beef = `beef`. A's page shows friendly labels, but stores tags.
+
+Spice level and taste options on the preferences page are read directly from
+`SPICE_LEVELS` and `TASTES` in `data/ingredients.py`:
+
+- `SPICE_LEVELS`: `0` none, `1` mild, `2` medium, `3` hot. The user picks the highest
+  level they accept (single choice); the page stores the int key.
+- `TASTES`: `savory`, `sweet`, `sour`, `mild`. The user picks the tastes they like
+  (multiple choice); the page stores a list in `flavor`.
 
 ## 3. Recipe (`data/recipes.json`, owner: B, data entry: A)
 
@@ -65,6 +87,10 @@ no pork = `pork`, no beef = `beef`. A's page shows friendly labels, but stores t
 }
 ```
 
+- `cuisine`: one value from `CUISINES`.
+- `spice_level`: int 0-3, a key of `SPICE_LEVELS`.
+- `flavor`: one value from `TASTES`.
+- `estimated_price`: estimated cost of ONE serving, in Canadian dollars (CAD).
 - `ingredients`: names only (no quantities), all must exist in `INGREDIENTS`.
 - List ALL ingredients, including sauces and seasonings (soy sauce, oil, ...), because
   their tags also count. A recipe whose ingredient list is incomplete must not be added
