@@ -32,8 +32,8 @@ INGREDIENTS = {
 - `shelf_days`: default days until the ingredient should be used, counted from purchase date.
   Used to estimate `expiry_date` because receipts do not contain it.
 - `tags`: used to exclude recipes. Allowed tags (extend only by agreement):
-  `peanut`, `tree_nut`, `dairy`, `egg`, `gluten`, `soy`, `fish`, `shellfish`,
-  `meat`, `pork`, `beef`.
+  `soy`, `wheat`, `dairy`, `egg`, `peanut`, `tree_nut`, `sesame`, `shellfish`,
+  `fish`, `meat`, `pork`, `beef` (same as `ALL_TAGS` in `data/ingredients.py`).
 
 ## 2. Preferences (A writes, B reads)
 
