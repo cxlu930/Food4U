@@ -1,7 +1,12 @@
 import sqlite3
-from datetime import date
+from datetime import date, timedelta
+
+from data.ingredients import INGREDIENTS
 
 DB_PATH = "food4u.db"
+
+# Demo only: fill an empty pantry with sample items. Set to False to turn it off.
+SEED_SAMPLE_DATA = True
 
 
 def get_connection():
@@ -18,7 +23,7 @@ def init_db():
             weekly_budget REAL,
             cuisines TEXT,               -- comma-separated, e.g. "chinese,japanese"
             spice_level INTEGER,         -- 0 none, 1 mild, 2 medium, 3 hot
-            flavor TEXT,                 -- sweet / savory / no_preference
+            flavor TEXT,                 -- comma-separated TASTES, e.g. "savory,sour"; empty = no preference
             avoid_tags TEXT              -- comma-separated allergy / diet tags
         );
 
@@ -59,13 +64,51 @@ def init_db():
         );
         """
     )
+    if SEED_SAMPLE_DATA:
+        _seed_sample_data(conn)
     conn.commit()
     conn.close()
 
 
+def _seed_sample_data(conn):
+    # Only seed an EMPTY pantry, so restarting the app never inserts duplicates.
+    if conn.execute("SELECT COUNT(*) FROM PantryItems").fetchone()[0] > 0:
+        return
+
+    # (ingredient_name, quantity, unit, days_ago_bought, days_left)
+    # Dates are relative to today, so every status always shows up in a demo.
+    samples = [
+        ("tomato", 4, "pcs", 2, 5),        # fresh
+        ("rice", 2, "kg", 10, 300),        # fresh
+        ("onion", 3, "pcs", 3, 27),        # fresh
+        ("garlic", 1, "bulb", 5, 40),      # fresh
+        ("carrot", 5, "pcs", 4, 15),       # fresh
+        ("chicken", 500, "g", 6, 1),       # use_first
+        ("egg", 6, "pcs", 10, 2),          # use_first
+        ("spinach", 1, "bag", 5, 0),       # check_item (reached its date today)
+        ("milk", 1, "L", 9, -2),           # check_item (past its date)
+    ]
+    today = date.today()
+    rows = [
+        (
+            name,
+            quantity,
+            unit,
+            (today - timedelta(days=days_ago)).isoformat(),
+            (today + timedelta(days=days_left)).isoformat(),
+        )
+        for name, quantity, unit, days_ago, days_left in samples
+    ]
+    conn.executemany(
+        "INSERT INTO PantryItems (ingredient_name, quantity, unit, purchase_date, "
+        "expiry_date) VALUES (?, ?, ?, ?, ?)",
+        rows,
+    )
+
+
 # ---------------------------------------------------------------------------
 # Data functions for A, B, C. Shapes follow docs/data-contract.md.
-# FIRST VERSION: returns fake data, no SQL yet. TODO: replace with real SQL.
+# Functions marked TODO are still placeholders; the rest use real SQL.
 # ---------------------------------------------------------------------------
 
 
@@ -82,7 +125,7 @@ def get_preferences():
             "weekly_budget": 0.0,
             "cuisines": [],
             "spice_level": 0,
-            "flavor": "no_preference",
+            "flavor": [],
             "avoid_tags": [],
         }
 
@@ -92,12 +135,16 @@ def get_preferences():
         # "a,b" -> ["a", "b"]; empty string -> []
         "cuisines": [c for c in (cuisines or "").split(",") if c],
         "spice_level": spice_level,
-        "flavor": flavor,
+        "flavor": [f for f in (flavor or "").split(",") if f and f != "no_preference"],
         "avoid_tags": [t for t in (avoid_tags or "").split(",") if t],
     }
 
 
 def save_preferences(prefs):
+    flavor = prefs["flavor"]
+    if isinstance(flavor, str):  # accept "savory,sour" too, in case a page still sends text
+        flavor = flavor.split(",")
+
     conn = get_connection()
     # INSERT OR REPLACE with id = 1 overwrites the single preferences row.
     conn.execute(
@@ -108,7 +155,7 @@ def save_preferences(prefs):
             prefs["weekly_budget"],
             ",".join(prefs["cuisines"]),  # ["a", "b"] -> "a,b"
             prefs["spice_level"],
-            prefs["flavor"],
+            ",".join(f for f in flavor if f and f != "no_preference"),
             ",".join(prefs["avoid_tags"]),
         ),
     )
@@ -157,9 +204,52 @@ def get_pantry_items():
 
 
 def save_confirmed_receipt(receipt, items):
-    # TODO: insert Receipts + ReceiptItems, add recognized items to PantryItems,
-    # and do nothing if this receipt was already saved.
-    pass
+    """Save a receipt the user confirmed. Returns True if saved, False if it was
+    already saved (same store, date and total), so spending never counts twice."""
+    conn = get_connection()
+    try:
+        already_saved = conn.execute(
+            "SELECT 1 FROM Receipts WHERE store = ? AND purchase_date = ? AND total_price = ?",
+            (receipt["store"], receipt["purchase_date"], receipt["total_price"]),
+        ).fetchone()
+        if already_saved:
+            return False
+
+        cursor = conn.execute(
+            "INSERT INTO Receipts (store, purchase_date, total_price) VALUES (?, ?, ?)",
+            (receipt["store"], receipt["purchase_date"], receipt["total_price"]),
+        )
+        receipt_id = cursor.lastrowid
+        purchase_date = date.fromisoformat(receipt["purchase_date"])
+
+        for item in items:
+            name = item["ingredient_name"]
+            # Only names from our fixed list count as recognized. Never invent items.
+            recognized = bool(item["recognized"]) and name in INGREDIENTS
+            conn.execute(
+                "INSERT INTO ReceiptItems "
+                "(receipt_id, ingredient_name, raw_text, price, recognized) "
+                "VALUES (?, ?, ?, ?, ?)",
+                (receipt_id, name if recognized else None, item["raw_text"],
+                 item["price"], 1 if recognized else 0),
+            )
+            if recognized:  # unrecognized items are NOT added to the pantry
+                expiry_date = purchase_date + timedelta(days=INGREDIENTS[name]["shelf_days"])
+                conn.execute(
+                    "INSERT INTO PantryItems (ingredient_name, quantity, unit, "
+                    "purchase_date, expiry_date, source_receipt_id) "
+                    "VALUES (?, ?, ?, ?, ?, ?)",
+                    (name, item["quantity"], item["unit"], purchase_date.isoformat(),
+                     expiry_date.isoformat(), receipt_id),
+                )
+
+        conn.commit()  # all-or-nothing: either everything is saved, or nothing
+        return True
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
 
 
 def update_pantry_quantity(item_id, quantity):
@@ -168,8 +258,21 @@ def update_pantry_quantity(item_id, quantity):
 
 
 def get_spending_summary():
-    # TODO: budget from UserPreferences, spent = this week's Receipts.total_price
-    return {"budget": 60.0, "spent": 23.4, "remaining": 36.6}
+    budget = get_preferences()["weekly_budget"]
+
+    today = date.today()
+    monday = today - timedelta(days=today.weekday())  # weekday(): Monday = 0
+    sunday = monday + timedelta(days=6)
+
+    conn = get_connection()
+    spent = conn.execute(
+        "SELECT COALESCE(SUM(total_price), 0) FROM Receipts "
+        "WHERE purchase_date BETWEEN ? AND ?",
+        (monday.isoformat(), sunday.isoformat()),
+    ).fetchone()[0]
+    conn.close()
+
+    return {"budget": budget, "spent": round(spent, 2), "remaining": round(budget - spent, 2)}
 
 
 if __name__ == "__main__":
