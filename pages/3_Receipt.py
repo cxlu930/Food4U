@@ -11,6 +11,8 @@ import streamlit as st
 
 from services.receipt_parser import ingredient_catalog, parse_receipt, prepare_confirmation
 
+st.page_link("app.py", label="← Back to Home")
+
 st.title("Upload Receipt")
 st.info("Upload a grocery receipt to extract items using Gemini AI.")
 st.caption("Review and edit the extracted information before confirming. Database integration is pending.")

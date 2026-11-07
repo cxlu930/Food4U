@@ -1,19 +1,16 @@
-
 import streamlit as st
 
 from db import get_preferences, save_preferences, get_spending_summary
 from data.ingredients import ALL_TAGS, CUISINES, SPICE_LEVELS, TASTES
 
 
-# Convert internal values into user-friendly labels
 def display_name(value):
     return value.replace("_", " ").title()
 
 
-# Load saved preferences from database
 saved_prefs = get_preferences() or {}
 
-saved_budget = float(saved_prefs.get("weekly_budget", 60.0) or 0.0)
+saved_budget = float(saved_prefs.get("weekly_budget") or 100.0)
 
 saved_cuisines = saved_prefs.get("cuisines", [])
 if not isinstance(saved_cuisines, list):
@@ -22,12 +19,10 @@ saved_cuisines = [
     c for c in saved_cuisines if c in CUISINES
 ]
 
-saved_spice = saved_prefs.get("spice_level", 2)
+saved_spice = saved_prefs.get("spice_level", 0)
 if saved_spice not in SPICE_LEVELS:
-    saved_spice = 2
+    saved_spice = 0
 
-# D currently stores flavor as a TEXT string.
-# Support comma-separated flavors while the contract is being updated.
 saved_flavors = saved_prefs.get("flavor", "")
 if isinstance(saved_flavors, str):
     saved_flavors = saved_flavors.split(",")
@@ -46,12 +41,12 @@ saved_tags = [
 ]
 
 
-# Page title
+st.page_link("app.py", label="← Back to Home")
+
 st.title("Food4U")
 st.subheader("Your Food Preferences")
 
 
-# Preferences form
 with st.form("preferences_form"):
 
     weekly_budget = st.number_input(
@@ -92,14 +87,13 @@ with st.form("preferences_form"):
     submitted = st.form_submit_button("Save Preferences")
 
 
-# Save preferences to database
 if submitted:
 
     preferences = {
         "weekly_budget": float(weekly_budget),
         "cuisines": cuisines,
         "spice_level": int(spice_level),
-        "flavor": ",".join(flavors),
+        "flavor": flavors,
         "avoid_tags": avoid_tags
     }
 
@@ -108,7 +102,6 @@ if submitted:
     st.success("Preferences saved successfully!")
 
 
-# Weekly spending dashboard
 st.divider()
 st.subheader("Weekly Spending Dashboard")
 
