@@ -11,10 +11,14 @@ def init_db():
     conn = get_connection()
     conn.executescript(
         """
+        -- Only one row (id = 1): there are no user accounts yet.
         CREATE TABLE IF NOT EXISTS UserPreferences (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            cuisine TEXT,
-            weekly_budget REAL
+            id INTEGER PRIMARY KEY,
+            weekly_budget REAL,
+            cuisines TEXT,               -- comma-separated, e.g. "chinese,japanese"
+            spice_level INTEGER,         -- 0 none, 1 mild, 2 medium, 3 hot
+            flavor TEXT,                 -- sweet / savory / no_preference
+            avoid_tags TEXT              -- comma-separated allergy / diet tags
         );
 
         CREATE TABLE IF NOT EXISTS Recipes (
@@ -64,19 +68,50 @@ def init_db():
 
 
 def get_preferences():
-    # TODO: read from UserPreferences
+    conn = get_connection()
+    row = conn.execute(
+        "SELECT weekly_budget, cuisines, spice_level, flavor, avoid_tags "
+        "FROM UserPreferences WHERE id = 1"
+    ).fetchone()
+    conn.close()
+
+    if row is None:  # nothing saved yet: return empty defaults
+        return {
+            "weekly_budget": 0.0,
+            "cuisines": [],
+            "spice_level": 0,
+            "flavor": "no_preference",
+            "avoid_tags": [],
+        }
+
+    weekly_budget, cuisines, spice_level, flavor, avoid_tags = row
     return {
-        "weekly_budget": 60.0,
-        "cuisines": ["chinese", "japanese"],
-        "spice_level": 2,
-        "flavor": "savory",
-        "avoid_tags": ["peanut"],
+        "weekly_budget": weekly_budget,
+        # "a,b" -> ["a", "b"]; empty string -> []
+        "cuisines": [c for c in (cuisines or "").split(",") if c],
+        "spice_level": spice_level,
+        "flavor": flavor,
+        "avoid_tags": [t for t in (avoid_tags or "").split(",") if t],
     }
 
 
 def save_preferences(prefs):
-    # TODO: write prefs to UserPreferences
-    pass
+    conn = get_connection()
+    # INSERT OR REPLACE with id = 1 overwrites the single preferences row.
+    conn.execute(
+        "INSERT OR REPLACE INTO UserPreferences "
+        "(id, weekly_budget, cuisines, spice_level, flavor, avoid_tags) "
+        "VALUES (1, ?, ?, ?, ?, ?)",
+        (
+            prefs["weekly_budget"],
+            ",".join(prefs["cuisines"]),  # ["a", "b"] -> "a,b"
+            prefs["spice_level"],
+            prefs["flavor"],
+            ",".join(prefs["avoid_tags"]),
+        ),
+    )
+    conn.commit()
+    conn.close()
 
 
 def get_pantry_items():
