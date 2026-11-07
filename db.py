@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import date
 
 DB_PATH = "food4u.db"
 
@@ -52,7 +53,8 @@ def init_db():
             ingredient_name TEXT NOT NULL,
             quantity REAL,
             unit TEXT,
-            expiry_date TEXT,
+            purchase_date TEXT,          -- YYYY-MM-DD
+            expiry_date TEXT,            -- purchase_date + shelf_days (an estimate)
             source_receipt_id INTEGER
         );
         """
@@ -115,42 +117,43 @@ def save_preferences(prefs):
 
 
 def get_pantry_items():
-    # TODO: read from PantryItems and compute days_left / status
-    return [
-        {
-            "id": 1,
-            "ingredient_name": "tomato",
-            "quantity": 3.0,
-            "unit": "pcs",
-            "purchase_date": "2026-11-05",
-            "expiry_date": "2026-11-12",
-            "days_left": 5,
-            "status": "fresh",
-            "source_receipt_id": 1,
-        },
-        {
-            "id": 2,
-            "ingredient_name": "chicken",
-            "quantity": 500.0,
-            "unit": "g",
-            "purchase_date": "2026-11-05",
-            "expiry_date": "2026-11-08",
-            "days_left": 1,
-            "status": "use_first",
-            "source_receipt_id": 1,
-        },
-        {
-            "id": 3,
-            "ingredient_name": "milk",
-            "quantity": 1.0,
-            "unit": "L",
-            "purchase_date": "2026-10-28",
-            "expiry_date": "2026-11-04",
-            "days_left": -3,
-            "status": "check_item",
-            "source_receipt_id": None,
-        },
-    ]
+    conn = get_connection()
+    rows = conn.execute(
+        "SELECT id, ingredient_name, quantity, unit, purchase_date, expiry_date, "
+        "source_receipt_id FROM PantryItems "
+        "WHERE quantity > 0 "  # quantity 0 = used up, hide it
+        "ORDER BY expiry_date IS NULL, expiry_date"  # soonest first, no date last
+    ).fetchall()
+    conn.close()
+
+    items = []
+    for id_, name, quantity, unit, purchase_date, expiry_date, receipt_id in rows:
+        if expiry_date:
+            days_left = (date.fromisoformat(expiry_date) - date.today()).days
+            if days_left > 2:
+                status = "fresh"
+            elif days_left >= 1:
+                status = "use_first"
+            else:
+                status = "check_item"
+        else:  # no date known: no reminder
+            days_left = None
+            status = "fresh"
+
+        items.append(
+            {
+                "id": id_,
+                "ingredient_name": name,
+                "quantity": quantity,
+                "unit": unit,
+                "purchase_date": purchase_date,
+                "expiry_date": expiry_date,
+                "days_left": days_left,
+                "status": status,
+                "source_receipt_id": receipt_id,
+            }
+        )
+    return items
 
 
 def save_confirmed_receipt(receipt, items):
