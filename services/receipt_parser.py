@@ -16,7 +16,7 @@ def match_ingredient(raw_text):
     """Match catalog keys and aliases; unknown lines stay unrecognized."""
     text = raw_text.strip().casefold()
     for name, details in ingredient_catalog().items():
-        if text in [value.strip().casefold() for value in [name, *details.get("aliases", [])]]:
+        if text in [value.strip().casefold() for value in [name, details["display_name"], *details.get("aliases", [])]]:
             return name
     return None
 
