@@ -1,4 +1,4 @@
-# Food4U (PantryWise)
+# Food4U
 
 A web app that helps university students plan meals, track groceries in a pantry, and stay on budget.
 

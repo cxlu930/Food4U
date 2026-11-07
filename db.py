@@ -1,6 +1,6 @@
 import sqlite3
 
-DB_PATH = "pantrywise.db"
+DB_PATH = "food4u.db"
 
 
 def get_connection():

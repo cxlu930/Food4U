@@ -4,5 +4,5 @@ from db import init_db
 
 init_db()
 
-st.title("Food4U (PantryWise)")
+st.title("Food4U")
 st.write("Plan meals, track your pantry, stay on budget.")
