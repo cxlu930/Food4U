@@ -9,6 +9,8 @@ import streamlit as st
 
 from services.receipt_parser import ingredient_catalog, parse_receipt, prepare_confirmation
 
+st.page_link("app.py", label="← Back to Home")
+
 st.title("Upload Receipt")
 st.warning("MOCK DATA — no OCR or AI recognition is performed. The image is not analyzed.")
 st.caption("Database integration is pending. Confirmation is temporary and does not save to SQLite.")

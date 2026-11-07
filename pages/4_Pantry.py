@@ -5,6 +5,8 @@ from db import get_pantry_items, init_db, update_pantry_quantity
 
 st.set_page_config(layout="wide")
 
+st.page_link("app.py", label="← Back to Home")
+
 init_db()
 
 STATUS_LABELS = {

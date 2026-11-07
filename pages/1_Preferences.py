@@ -41,6 +41,8 @@ saved_tags = [
 ]
 
 
+st.page_link("app.py", label="← Back to Home")
+
 st.title("Food4U")
 st.subheader("Your Food Preferences")
 
