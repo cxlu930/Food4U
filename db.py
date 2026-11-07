@@ -78,15 +78,15 @@ def _seed_sample_data(conn):
     # (ingredient_name, quantity, unit, days_ago_bought, days_left)
     # Dates are relative to today, so every status always shows up in a demo.
     samples = [
-        ("tomato", 4, "pcs", 2, 5),        # fresh
-        ("rice", 2, "kg", 10, 300),        # fresh
-        ("onion", 3, "pcs", 3, 27),        # fresh
-        ("garlic", 1, "bulb", 5, 40),      # fresh
-        ("carrot", 5, "pcs", 4, 15),       # fresh
-        ("chicken", 500, "g", 6, 1),       # use_first
-        ("egg", 6, "pcs", 10, 2),          # use_first
-        ("spinach", 1, "bag", 5, 0),       # check_item (reached its date today)
-        ("milk", 1, "L", 9, -2),           # check_item (past its date)
+        ("tomato", 4, "pcs", 2, 5),
+        ("rice", 2, "kg", 10, 300),
+        ("onion", 3, "pcs", 3, 27),
+        ("garlic", 2, "pcs", 5, 40),
+        ("carrot", 5, "pcs", 4, 15),
+        ("chicken", 500, "g", 6, 1),
+        ("egg", 6, "pcs", 10, 2),
+        ("spinach", 200, "g", 5, 0),
+        ("milk", 1, "L", 9, -2),
     ]
     today = date.today()
     rows = [
@@ -108,7 +108,6 @@ def _seed_sample_data(conn):
 
 # ---------------------------------------------------------------------------
 # Data functions for A, B, C. Shapes follow docs/data-contract.md.
-# Functions marked TODO are still placeholders; the rest use real SQL.
 # ---------------------------------------------------------------------------
 
 
@@ -120,7 +119,7 @@ def get_preferences():
     ).fetchone()
     conn.close()
 
-    if row is None:  # nothing saved yet: return empty defaults
+    if row is None:
         return {
             "weekly_budget": 0.0,
             "cuisines": [],
@@ -132,7 +131,6 @@ def get_preferences():
     weekly_budget, cuisines, spice_level, flavor, avoid_tags = row
     return {
         "weekly_budget": weekly_budget,
-        # "a,b" -> ["a", "b"]; empty string -> []
         "cuisines": [c for c in (cuisines or "").split(",") if c],
         "spice_level": spice_level,
         "flavor": [f for f in (flavor or "").split(",") if f and f != "no_preference"],
@@ -153,7 +151,7 @@ def save_preferences(prefs):
         "VALUES (1, ?, ?, ?, ?, ?)",
         (
             prefs["weekly_budget"],
-            ",".join(prefs["cuisines"]),  # ["a", "b"] -> "a,b"
+            ",".join(prefs["cuisines"]),
             prefs["spice_level"],
             ",".join(f for f in flavor if f and f != "no_preference"),
             ",".join(prefs["avoid_tags"]),
@@ -168,8 +166,8 @@ def get_pantry_items():
     rows = conn.execute(
         "SELECT id, ingredient_name, quantity, unit, purchase_date, expiry_date, "
         "source_receipt_id FROM PantryItems "
-        "WHERE quantity > 0 "  # quantity 0 = used up, hide it
-        "ORDER BY expiry_date IS NULL, expiry_date"  # soonest first, no date last
+        "WHERE quantity > 0 "
+        "ORDER BY expiry_date IS NULL, expiry_date"
     ).fetchall()
     conn.close()
 
@@ -253,15 +251,20 @@ def save_confirmed_receipt(receipt, items):
 
 
 def update_pantry_quantity(item_id, quantity):
-    # TODO: update PantryItems.quantity (0 = used up). Must NOT delete the receipt.
-    pass
+    """Set the quantity of one pantry item. 0 = used up (hidden, but the row stays).
+    Only touches PantryItems, never Receipts."""
+    quantity = max(quantity, 0)
+    conn = get_connection()
+    conn.execute("UPDATE PantryItems SET quantity = ? WHERE id = ?", (quantity, item_id))
+    conn.commit()
+    conn.close()
 
 
 def get_spending_summary():
     budget = get_preferences()["weekly_budget"]
 
     today = date.today()
-    monday = today - timedelta(days=today.weekday())  # weekday(): Monday = 0
+    monday = today - timedelta(days=today.weekday())
     sunday = monday + timedelta(days=6)
 
     conn = get_connection()
