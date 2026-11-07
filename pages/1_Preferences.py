@@ -2,53 +2,51 @@
 import streamlit as st
 
 from db import get_preferences, save_preferences, get_spending_summary
-from data.ingredients import ALL_TAGS
-
-CUISINES = [
-    "chinese",
-    "japanese",
-    "korean",
-    "indian",
-    "italian",
-    "mexican",
-    "vietnamese",
-    "western"
-]
+from data.ingredients import ALL_TAGS, CUISINES, SPICE_LEVELS, TASTES
 
 
-FLAVORS = [
-    "no_preference",
-    "savory",
-    "sweet"
-]
-
-SPICE_LABELS = ["None", "Mild", "Medium", "Hot"]
-
-
+# Convert internal values into user-friendly labels
 def display_name(value):
     return value.replace("_", " ").title()
 
 
+# Load saved preferences from database
 saved_prefs = get_preferences() or {}
 
-saved_budget = float(saved_prefs.get("weekly_budget", 60.0))
+saved_budget = float(saved_prefs.get("weekly_budget", 60.0) or 0.0)
+
+saved_cuisines = saved_prefs.get("cuisines", [])
+if not isinstance(saved_cuisines, list):
+    saved_cuisines = []
 saved_cuisines = [
-    cuisine for cuisine in saved_prefs.get("cuisines", ["chinese"])
-    if cuisine in CUISINES
+    c for c in saved_cuisines if c in CUISINES
 ]
-saved_spice = int(saved_prefs.get("spice_level", 2))
-saved_spice = max(0, min(3, saved_spice))
 
-saved_flavor = saved_prefs.get("flavor", "no_preference")
-if saved_flavor not in FLAVORS:
-    saved_flavor = "no_preference"
+saved_spice = saved_prefs.get("spice_level", 2)
+if saved_spice not in SPICE_LEVELS:
+    saved_spice = 2
 
+# D currently stores flavor as a TEXT string.
+# Support comma-separated flavors while the contract is being updated.
+saved_flavors = saved_prefs.get("flavor", "")
+if isinstance(saved_flavors, str):
+    saved_flavors = saved_flavors.split(",")
+elif not isinstance(saved_flavors, list):
+    saved_flavors = []
+
+saved_flavors = [
+    f for f in saved_flavors if f in TASTES
+]
+
+saved_tags = saved_prefs.get("avoid_tags", [])
+if not isinstance(saved_tags, list):
+    saved_tags = []
 saved_tags = [
-    tag for tag in saved_prefs.get("avoid_tags", [])
-    if tag in ALL_TAGS
+    tag for tag in saved_tags if tag in ALL_TAGS
 ]
 
 
+# Page title
 st.title("Food4U")
 st.subheader("Your Food Preferences")
 
@@ -59,7 +57,7 @@ with st.form("preferences_form"):
     weekly_budget = st.number_input(
         "Weekly Budget (CAD)",
         min_value=0.0,
-        value=saved_budget,
+        value=max(0.0, saved_budget),
         step=5.0
     )
 
@@ -72,15 +70,15 @@ with st.form("preferences_form"):
 
     spice_level = st.select_slider(
         "Maximum Spice Level",
-        options=[0, 1, 2, 3],
+        options=list(SPICE_LEVELS.keys()),
         value=saved_spice,
-        format_func=lambda x: SPICE_LABELS[x]
+        format_func=lambda x: SPICE_LEVELS[x].title()
     )
 
-    flavor = st.selectbox(
-        "Preferred Flavor",
-        options=FLAVORS,
-        index=FLAVORS.index(saved_flavor),
+    flavors = st.multiselect(
+        "Preferred Flavors",
+        options=TASTES,
+        default=saved_flavors,
         format_func=display_name
     )
 
@@ -91,18 +89,17 @@ with st.form("preferences_form"):
         format_func=display_name
     )
 
-    submitted = st.form_submit_button(
-        "Save Preferences"
-    )
+    submitted = st.form_submit_button("Save Preferences")
 
 
+# Save preferences to database
 if submitted:
 
     preferences = {
         "weekly_budget": float(weekly_budget),
         "cuisines": cuisines,
         "spice_level": int(spice_level),
-        "flavor": flavor,
+        "flavor": ",".join(flavors),
         "avoid_tags": avoid_tags
     }
 
@@ -111,6 +108,7 @@ if submitted:
     st.success("Preferences saved successfully!")
 
 
+# Weekly spending dashboard
 st.divider()
 st.subheader("Weekly Spending Dashboard")
 
