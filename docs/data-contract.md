@@ -49,6 +49,19 @@ Fixed list. Recipe `cuisine` and preference `cuisines` may only use these values
   (lowercase, spaces to underscores, then check against `CUISINES`).
 - Extend only by agreement.
 
+## 1c. UNITS (`data/ingredients.py`, owner: B)
+
+Fixed list. The `unit` field of pantry items (section 4) and receipt items (section 5)
+may only use these values:
+`pcs`, `g`, `kg`, `lb`, `ml`, `L`, `bag`, `bulb`, `bunch`, `pack`, `can`, `bottle`
+(same as `UNITS` in `data/ingredients.py`).
+
+- Naming rule: units are lowercase, except `L` for litres (a lowercase `l` looks like
+  the number `1`). Multiple words are joined with underscores.
+- Unrecognized receipt items (`ingredient_name` is `None`) have `unit: None`.
+  Every recognized item must have a unit from `UNITS`.
+- Extend only by agreement.
+
 ## 2. Preferences (A writes, B reads)
 
 ```python

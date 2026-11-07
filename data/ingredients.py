@@ -59,6 +59,24 @@ TASTES = [
     "mild",
 ]
 
+# Units for pantry items and receipt items ("unit" field).
+# Units are lowercase except "L" for litres (a lowercase "l" looks like the number 1).
+# Multiple words would be joined with underscores. Unrecognized receipt items use None.
+UNITS = [
+    "pcs",     # pieces (tomato, egg, onion)
+    "g",       # grams
+    "kg",      # kilograms
+    "lb",      # pounds, common on Canadian grocery receipts (meat, produce)
+    "ml",      # millilitres
+    "L",       # litres
+    "bag",     # e.g. spinach
+    "bulb",    # e.g. garlic
+    "bunch",   # e.g. green onion, cilantro
+    "pack",    # e.g. tofu, bacon, noodles, tortillas
+    "can",     # e.g. canned tomato, kidney beans
+    "bottle",  # e.g. soy sauce, oil, ketchup
+]
+
 
 def _item(display_name, category, shelf_days, tags=None, aliases=None):
     """Build one ingredient entry in the data-contract shape."""
