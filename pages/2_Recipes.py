@@ -59,7 +59,7 @@ def spice_text(level):
     return "🌶️" * level if level else "Not spicy"
 
 
-def render_card(result):
+def render_card(result, mode):
     recipe = result["recipe"]
     cuisine = recipe.get("cuisine", "")
     emoji = CUISINE_EMOJI.get(cuisine, "🍽️")
@@ -80,10 +80,11 @@ def render_card(result):
                 f"Taste: {str(recipe.get('flavor', '')).title()}"
             )
 
+            # Cook mode never shows a shopping list (it only returns recipes with nothing missing).
             missing = result["missing_ingredients"]
-            if missing:
+            if missing and mode != MODE_COOK:
                 st.markdown("**Need to buy:** " + ", ".join(ingredient_label(n) for n in missing))
-            else:
+            elif not missing:
                 st.markdown("✅ You have everything you need")
 
             if result["warnings"]:
@@ -115,7 +116,13 @@ if data["using_default_spice"]:
 
 # ---------- Recipe cards ----------
 results = data["results"]
-if not results:
+if not results and mode == MODE_COOK:
+    st.info(
+        "Nothing you can cook with your current pantry. Try Plan My Meals to see "
+        "what to buy, or add ingredients in Pantry."
+    )
+    st.page_link("pages/4_Pantry.py", label="Go to Pantry", icon="🧺")
+elif not results:
     st.info(
         "No recipes match right now. Try adjusting your settings in Preferences, "
         "or add ingredients to your Pantry."
@@ -125,4 +132,4 @@ if not results:
     link_right.page_link("pages/4_Pantry.py", label="Go to Pantry", icon="🧺")
 else:
     for result in results:
-        render_card(result)
+        render_card(result, mode)
