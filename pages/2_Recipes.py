@@ -57,10 +57,17 @@ st.markdown(
     .st-key-recipes_page h1, .st-key-recipes_page h2, .st-key-recipes_page h3 { font-family:Arial,Helvetica,sans-serif !important; color:#111310; font-weight:800; }
     .st-key-recipes_page h1 { font-size:clamp(44px,5vw,70px); letter-spacing:-2.5px; }
     .st-key-recipes_page [data-testid="stPageLink"] a { color:#405326; font-weight:700; }
-    .st-key-recipes_page [data-testid="stMetric"] { background:#edf2da; border:1px solid #d9dbcc; border-radius:20px; padding:16px 22px; margin:6px 0 12px; }
-    .st-key-recipes_page [data-testid="stMetricValue"] { font-size:34px; color:#111310; font-weight:800; }
-    .st-key-recipes_page [data-testid="stButtonGroup"] button { border-radius:999px; background:#FDF9F2; color:#111310; border-color:#dedbd3; }
-    .st-key-recipes_page [data-testid="stButtonGroup"] button[aria-checked="true"] { background:#D2E39A; border-color:#9BC336; }
+    .st-key-recipes_page [data-testid="stButtonGroup"] > div:last-child { gap:12px; flex-wrap:wrap; }
+    .st-key-recipes_page [data-testid="stButtonGroup"] button {
+      border-radius:999px !important; background:#FDF9F2; color:#111310;
+      border:1px solid #dedbd3; padding:14px 28px; min-height:56px; margin:0 !important;
+      font-size:18px; font-weight:600;
+    }
+    .st-key-recipes_page [data-testid="stButtonGroup"] button p { font-size:18px; font-weight:inherit; }
+    .st-key-recipes_page [data-testid="stButtonGroup"] button[aria-checked="true"] {
+      background:#B8E33D; border-color:#B8E33D; color:#111310; font-weight:800;
+    }
+    .st-key-recipes_page [data-testid="stButtonGroup"] button:hover { border-color:#9BC336; }
     .st-key-recipes_page [role="radiogroup"] { gap:8px; flex-wrap:wrap; }
     .st-key-recipes_page [role="radiogroup"] label { background:#FDF9F2; border:1px solid #dedbd3; border-radius:999px; padding:7px 13px; margin:0; }
     .st-key-recipes_page [role="radiogroup"] label:has(input:checked) { background:#D2E39A; border-color:#9BC336; }
@@ -77,6 +84,8 @@ st.markdown(
     @media(max-width:760px) {
       body:has(.st-key-recipes_page) [data-testid="stMainBlockContainer"] { padding:18px; }
       .st-key-recipes_page [class*="st-key-recipe_card_"] { padding:16px !important; }
+      .st-key-recipes_page [data-testid="stButtonGroup"] > div:last-child { width:100%; }
+      .st-key-recipes_page [data-testid="stButtonGroup"] button { flex:1 1 100%; padding:13px 20px; }
     }
     </style>
     """,
@@ -141,11 +150,6 @@ with st.container(key="recipes_page"):
     st.caption(description)
 
     data = get_recommendations(mode)
-
-    # ---------- Budget ----------
-    budget_col, remaining_col = st.columns(2)
-    budget_col.metric("Weekly budget", f"${data['weekly_budget']:.2f}")
-    remaining_col.metric("Remaining this week", f"${data['remaining_budget']:.2f}")
 
     if data["using_default_budget"]:
         st.info("Using default budget of $100. Set your own in Preferences.")
