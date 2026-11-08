@@ -110,12 +110,15 @@ INGREDIENTS = {
     "napa_cabbage": _item("Napa Cabbage", "vegetable", 14, aliases=["chinese cabbage", "suey choy", "wombok"]),
     "bok_choy": _item("Bok Choy", "vegetable", 3, aliases=["baby bok choy", "pak choi", "shanghai bok choy"]),
     "cabbage": _item("Cabbage", "vegetable", 10, aliases=["green cabbage", "red cabbage", "white cabbage"]),
+    "serrano_pepper": _item("Serrano Pepper", "vegetable", 7, aliases=["serrano", "serrano peppers", "hot pepper", "green chili"]),
 
     # ---------- Fruit ----------
     "lemon": _item("Lemon", "fruit", 21, aliases=["lemons"]),
     "lime": _item("Lime", "fruit", 21, aliases=["limes"]),
     "banana": _item("Banana", "fruit", 5, aliases=["bananas"]),
     "avocado": _item("Avocado", "fruit", 5, aliases=["avocados", "hass avocado"]),
+    "grapefruit": _item("Grapefruit", "fruit", 21, aliases=["grapefruits", "pink grapefruit", "red grapefruit"]),
+    "mango": _item("Mango", "fruit", 5, aliases=["mangoes", "mangos", "mango spears", "mango chunks", "ataulfo mango"]),
 
     # ---------- Meat ----------
     # Meat and seafood are assumed to be stored frozen; 14 days is a reminder window
