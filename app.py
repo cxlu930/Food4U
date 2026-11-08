@@ -129,7 +129,10 @@ st.markdown("""
 .st-key-settings_menu { position:absolute; top:24px; right:36px; width:auto; z-index:20; }
 .st-key-settings_menu button { background:transparent; border:0; box-shadow:none; color:#111310; font-size:13px; opacity:.7; padding:4px 8px; min-height:0; }
 .st-key-settings_menu button:hover { opacity:1; background:#efeadd; }
-.f4u .hero { display:grid; grid-template-columns: 1.45fr 1fr; align-items:center; min-height:270px; gap:30px; }
+.f4u .hero { display:grid; grid-template-columns: 1.7fr 1fr; align-items:center; min-height:270px; gap:30px; }
+.f4u .hero > div { min-width:0; container-type:inline-size; }
+.f4u .hero h1 { font-size:clamp(24px, 8.2cqw, 70px) !important; }
+.f4u .hero .hero-first-line { white-space:nowrap; }
 .f4u h1 { font-family:Arial,Helvetica,sans-serif !important; color:#111310; font-weight:800 !important; font-size:clamp(42px,4.7vw,70px) !important; line-height:1.01 !important; letter-spacing:-2.5px; margin:12px 0 14px; padding:0; }
 .f4u h1 .underline { position:relative; white-space:nowrap; }
 .f4u h1 .underline::after { content:""; position:absolute; width:125px; height:8px; border-radius:8px; background:#bedf39; bottom:-10px; right:0; transform:rotate(-10deg); }
@@ -405,7 +408,7 @@ st.html(f"""
 <div class="f4u">
  <div class="brand-row"><div class="brand">{icon('leaf')}<span>FOOD4U</span></div></div>
  <section class="hero">
-  <div><h1>Good food.<br>A little more <span class="underline">ease.</span></h1><p class="intro">Turn your groceries, pantry, and budget<br>into meals you actually want to eat.</p></div>
+  <div><h1><span class="hero-first-line">Your Food. Your Budget.</span><br><span class="underline">Your Way.</span></h1><p class="intro">Turn your groceries, pantry, and budget<br>into meals you actually want to eat.</p></div>
   <img class="hero-art" src="{artwork('bowl')}" alt="Hand drawn noodle bowl with egg, tomatoes and greens">
  </section>
 </div>

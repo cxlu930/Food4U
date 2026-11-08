@@ -71,14 +71,60 @@ def require_user():
             st.query_params["u"] = name  # keep the nickname in the URL so a reload keeps it
         return name
 
-    st.title("Welcome to Food4U")
-    st.write(
-        "Type a nickname to get your own preferences, pantry and budget. "
-        "Use the same nickname next time to see them again."
-    )
-    with st.form("food4u_nickname"):
-        nickname = st.text_input("Nickname", max_chars=30)
-        start = st.form_submit_button("Start")
+    st.markdown("""
+    <style>
+    .stApp:has(.st-key-food4u_login) { background:#FAF8F0; color:#111310; }
+    body:has(.st-key-food4u_login) [data-testid="stHeader"],
+    body:has(.st-key-food4u_login) [data-testid="stToolbar"],
+    body:has(.st-key-food4u_login) [data-testid="stSidebar"],
+    body:has(.st-key-food4u_login) [data-testid="stSidebarCollapsedControl"] { display:none; }
+    body:has(.st-key-food4u_login) [data-testid="stMainBlockContainer"] {
+      width:100%; max-width:488px; min-height:100vh; min-height:100svh;
+      padding:40px 24px; display:flex; flex-direction:column; justify-content:center;
+    }
+    body:has(.st-key-food4u_login) [data-testid="stMainBlockContainer"] > [data-testid="stVerticalBlock"] { width:100%; gap:0; }
+    .st-key-food4u_login { width:100%; max-width:440px; margin:0 auto; gap:0; font-family:Arial,Helvetica,sans-serif; }
+    .st-key-food4u_login .login-brand { display:flex; justify-content:center; align-items:center; gap:9px; margin-bottom:40px; font-size:25px; font-weight:800; letter-spacing:-.7px; color:#111310; }
+    .st-key-food4u_login .login-brand svg { width:34px; height:34px; }
+    .st-key-food4u_login h1 { font-family:Arial,Helvetica,sans-serif !important; text-align:center; font-size:clamp(38px,8vw,48px) !important; font-weight:800 !important; letter-spacing:-1.8px; line-height:1.15 !important; color:#111310; margin:0 !important; padding:0 !important; }
+    .st-key-food4u_login .login-subtitle { text-align:center; color:#79806d; font-size:16px; margin:14px 0 36px; }
+    .st-key-food4u_login [data-testid="stForm"] { border:0 !important; padding:0 !important; background:transparent; }
+    .st-key-food4u_login [data-testid="stForm"] [data-testid="stVerticalBlock"] { gap:18px; }
+    .st-key-food4u_login [data-testid="stWidgetLabel"] p { font-family:Arial,Helvetica,sans-serif; color:#283021; font-size:13px; font-weight:700; }
+    .st-key-food4u_login [data-baseweb="input"] { background:#fff; border:1px solid #dedfd5; border-radius:13px; box-shadow:none; }
+    .st-key-food4u_login [data-baseweb="input"]:focus-within { border-color:#9cbd40; box-shadow:0 0 0 2px #b8e63d33; }
+    .st-key-food4u_login input { color:#111310; font-family:Arial,Helvetica,sans-serif; font-size:15px; padding:14px 15px; }
+    .st-key-food4u_login input::placeholder { color:#919687; }
+    .st-key-food4u_login [data-testid="stFormSubmitButton"] button { width:100%; min-height:50px; border:1px solid #B8E63D; border-radius:999px; background:#B8E63D; color:#111310; font-family:Arial,Helvetica,sans-serif; font-weight:750; box-shadow:none; }
+    .st-key-food4u_login [data-testid="stFormSubmitButton"] button p { font-weight:750; }
+    .st-key-food4u_login [data-testid="stFormSubmitButton"] button:hover { background:#abd535; border-color:#abd535; color:#111310; }
+    .st-key-food4u_login [data-testid="stFormSubmitButton"] button:focus-visible { outline:2px solid #718e2c; outline-offset:3px; }
+    .st-key-food4u_login .login-footer { text-align:center; font-size:10px; letter-spacing:2px; color:#8b927d; margin:36px 0 0; }
+    @media(min-width:769px) {
+      .st-key-food4u_login h1 {
+        width:min(960px, calc(100vw - 48px)); position:relative;
+        left:50%; transform:translateX(-50%); white-space:nowrap;
+        font-size:clamp(30px, 4.4vw, 48px) !important;
+      }
+    }
+    @media(max-width:480px) {
+      body:has(.st-key-food4u_login) [data-testid="stMainBlockContainer"] { padding:32px 24px; }
+      .st-key-food4u_login .login-brand { margin-bottom:32px; }
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    with st.container(key="food4u_login"):
+        st.markdown('''<div class="login-brand">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" fill="none" stroke="#B8E63D" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M7 30C-2 12 13 5 34 3c0 19-6 31-22 27" fill="#B8E63D" stroke="none"/>
+            <path d="M3 36 27 12"/><path d="m10 28 15-15" stroke="#FAF8F0"/>
+          </svg><span>FOOD4U</span></div>''', unsafe_allow_html=True)
+        st.title("Your Food. Your Budget. Your Way.")
+        st.markdown('<p class="login-subtitle">Good to have you here.</p>', unsafe_allow_html=True)
+        with st.form("food4u_nickname", border=False):
+            nickname = st.text_input("Nickname", max_chars=30, placeholder="What should we call you?")
+            start = st.form_submit_button("Let's get cooking →", use_container_width=True)
+        st.markdown('<p class="login-footer">GOOD FOOD, LESS FUSS.</p>', unsafe_allow_html=True)
     if start:
         name = clean_nickname(nickname)
         if name:
