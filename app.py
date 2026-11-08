@@ -1,12 +1,13 @@
 import base64
 from html import escape
 from pathlib import Path
+from urllib.parse import quote
 
 import streamlit as st
 
 from data.ingredients import SPICE_LEVELS
-from db import get_preferences, get_spending_summary, init_db
-from services.recommender import get_recommendations
+from db import current_user, get_preferences, get_spending_summary, init_db, sign_out
+from services.recommender import get_recommendations, load_recipes
 
 st.set_page_config(page_title="Food4U", page_icon="🌿", layout="wide")
 
@@ -58,8 +59,10 @@ st.markdown("""
 .f4u .brand { display:flex; align-items:center; gap:10px; font-size:25px; font-weight:800; }
 .f4u .brand .icon { width:39px; height:39px; }
 .f4u .brand-row { display:flex; justify-content:space-between; align-items:center; }
-.f4u .settings { display:flex; gap:7px; align-items:center; font-size:13px; opacity:.7; }
-.f4u .settings .icon { width:20px; height:20px; }
+[data-testid="stMainBlockContainer"] { position: relative; }
+.st-key-settings_menu { position:absolute; top:24px; right:36px; width:auto; z-index:20; }
+.st-key-settings_menu button { background:transparent; border:0; box-shadow:none; color:#111310; font-size:13px; opacity:.7; padding:4px 8px; min-height:0; }
+.st-key-settings_menu button:hover { opacity:1; background:#efeadd; }
 .f4u .hero { display:grid; grid-template-columns: 1.45fr 1fr; align-items:center; min-height:270px; gap:30px; }
 .f4u h1 { font-family:Arial,Helvetica,sans-serif !important; color:#111310; font-weight:800 !important; font-size:clamp(42px,4.7vw,70px) !important; line-height:1.01 !important; letter-spacing:-2.5px; margin:12px 0 14px; padding:0; }
 .f4u h1 .underline { position:relative; white-space:nowrap; }
@@ -106,7 +109,36 @@ st.markdown("""
 .f4u .recommendation-heading { display:flex; align-items:center; justify-content:space-between; min-height:70px; margin-top:28px; padding:14px 0 8px; }
 .f4u .recommendation-heading h2 { font-size:36px; letter-spacing:-1px; }
 .f4u .recommendation-heading img { width:260px; height:200px; object-fit:contain; transform:rotate(-7deg); }
-.st-key-recommendation_details { border-top:1px solid #dedbd3; padding-top:15px; }
+.st-key-home_recommendation_row { margin-top:28px; }
+.st-key-home_recommendation_row [data-testid="stHorizontalBlock"]:has(.st-key-recommendation_details) {
+ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:stretch;
+}
+.st-key-home_recommendation_row [data-testid="stHorizontalBlock"]:has(.st-key-recommendation_details) > [data-testid="stColumn"] { width:100%; min-width:0; }
+.st-key-recommendation_details, .st-key-explore_recipes {
+ border:1px solid #d6ddbf !important; border-radius:26px !important;
+ background:#edf3d6; padding:24px !important; height:100%; min-width:0;
+}
+.st-key-home_recommendation_row h3 { font-family:Arial,Helvetica,sans-serif !important; color:#111310; font-size:27px; font-weight:800; letter-spacing:-.7px; }
+.st-key-home_recommendation_row .st-key-recommendation_details .recipe-result { border:0; padding:0; background:transparent; margin-top:6px; }
+.st-key-home_recommendation_row .st-key-recommendation_details .recipe-top { justify-content:flex-start; flex-wrap:wrap; gap:8px 14px; }
+.st-key-home_recommendation_row .st-key-recommendation_details .recipe-result h2 { font-size:25px; }
+.st-key-home_recommendation_row .st-key-recommendation_details .recipe-reasons li { max-width:100%; white-space:normal; overflow-wrap:anywhere; }
+.st-key-explore_recipes [data-testid="stHtml"] { height:100%; }
+.st-key-explore_recipes .explore-content { display:flex; flex-direction:column; gap:18px; height:100%; }
+.st-key-explore_recipes .explore-content h2 { font-size:27px; letter-spacing:-.7px; }
+.st-key-explore_recipes .explore-art { font-size:76px; line-height:1.2; text-align:center; padding:8px; letter-spacing:10px; }
+.st-key-explore_recipes .explore-copy { margin:0; color:#52623a; font-size:16px; line-height:1.55; }
+.st-key-explore_recipes .explore-facts { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.st-key-explore_recipes .explore-fact { border:1px solid #d6ddbf; border-radius:16px; background:#FDF9F2; padding:16px; }
+.st-key-explore_recipes .explore-fact strong { display:block; font-size:32px; color:#111310; }
+.st-key-explore_recipes .explore-fact span { font-size:13px; color:#657044; }
+.st-key-explore_recipes .explore-action { display:block; text-align:center; border-radius:999px; padding:14px 20px; background:#B8E33D; color:#111310; font-weight:800; margin-top:auto; }
+.st-key-explore_recipes .explore-action:hover { background:#a9d330; }
+@media(max-width:760px) {
+ .st-key-home_recommendation_row [data-testid="stHorizontalBlock"]:has(.st-key-recommendation_details) { grid-template-columns:minmax(0,1fr); }
+ .st-key-recommendation_details, .st-key-explore_recipes { padding:18px !important; }
+ .st-key-explore_recipes .explore-art { font-size:58px; }
+}
 @media(min-width:1100px) { .f4u .feature { height:290px; } }
 @media(max-width:1100px) {
  .f4u .preferences { grid-template-columns:repeat(2,minmax(0,1fr)); }
@@ -148,6 +180,7 @@ st.markdown("""
 
 init_db()
 prefs = get_preferences() or {}
+nick_q = "?u=" + quote(current_user() or "")  # plain links reload the app, so they carry the nickname
 summary = get_spending_summary()
 spent = summary["spent"]
 budget = float(prefs["weekly_budget"])
@@ -187,65 +220,97 @@ for title, value, glyph in [
     ("Flavors", labels(prefs.get("flavor")), "heart"),
     ("Allergies", labels(prefs.get("avoid_tags")), "allergy"),
 ]:
-    preference_cards += f'<a class="preference" href="./Preferences" target="_self" aria-label="Edit {title}">{icon(glyph)}<div class="preference-copy"><h2>{title}</h2><p title="{escape(value, quote=True)}">{escape(value)}</p></div>{icon("arrow")}</a>'
+    preference_cards += f'<a class="preference" href="./Preferences{nick_q}" target="_self" aria-label="Edit {title}">{icon(glyph)}<div class="preference-copy"><h2>{title}</h2><p title="{escape(value, quote=True)}">{escape(value)}</p></div>{icon("arrow")}</a>'
+
+with st.container(key="settings_menu"):
+    with st.popover("Settings", icon=":material/settings:"):
+        st.markdown(f"Signed in as **{current_user()}**")
+        if st.button("Switch user", key="switch_user", use_container_width=True):
+            sign_out()
 
 st.html(f"""
 <div class="f4u">
- <div class="brand-row"><div class="brand">{icon('leaf')}<span>FOOD4U</span></div><a class="settings" href="./Preferences" target="_self" aria-label="Open Preferences">{icon('settings')}Settings</a></div>
+ <div class="brand-row"><div class="brand">{icon('leaf')}<span>FOOD4U</span></div></div>
  <section class="hero">
   <div><h1>Good food.<br>A little more <span class="underline">ease.</span></h1><p class="intro">Turn your groceries, pantry, and budget<br>into meals you actually want to eat.</p></div>
   <img class="hero-art" src="{artwork('bowl')}" alt="Hand drawn noodle bowl with egg, tomatoes and greens">
  </section>
  <section class="stats" aria-label="Weekly spending overview">
   <div class="stat"><div><h2>Daily Spending</h2><div class="amount">${spent:,.2f}</div><div class="stat-note">{daily_note}</div><div class="daily-empty">Daily breakdown unavailable — no daily chart yet.</div></div></div>
-  <a class="stat remaining-card{' is-over-budget' if remaining < 0 else ''}" href="./Preferences" target="_self" aria-label="Remaining Budget: edit budget in Preferences"><div><div class="stat-heading"><h2>Remaining Budget</h2>{icon('arrow')}</div><div class="amount">${remaining:,.2f}</div><div class="stat-note budget-usage"><span>Weekly budget: ${budget:,.2f}</span><span>{usage_label}</span></div>{budget_progress}{budget_warning}</div></a>
+  <a class="stat remaining-card{' is-over-budget' if remaining < 0 else ''}" href="./Preferences{nick_q}" target="_self" aria-label="Remaining Budget: edit budget in Preferences"><div><div class="stat-heading"><h2>Remaining Budget</h2>{icon('arrow')}</div><div class="amount">${remaining:,.2f}</div><div class="stat-note budget-usage"><span>Weekly budget: ${budget:,.2f}</span><span>{usage_label}</span></div>{budget_progress}{budget_warning}</div></a>
  </section>
  <section class="features" aria-label="Your kitchen">
-  <a class="feature receipt" href="./Receipt" target="_self" aria-label="Upload Receipt: open receipt upload page">
+  <a class="feature receipt" href="./Receipt{nick_q}" target="_self" aria-label="Upload Receipt: open receipt upload page">
    <div class="feature-copy"><h2>Upload<br>Receipt</h2><p>Bring your groceries into your kitchen inventory.</p><div class="upload-target">{icon('upload')}<span>Upload a receipt<br>Click to get started</span></div></div>
    <img src="{artwork('receipt')}" alt="Grocery receipt beside a shopping bag of vegetables">
   </a>
-  <a class="feature pantry" href="./Pantry" target="_self" aria-label="Open My Pantry">
+  <a class="feature pantry" href="./Pantry{nick_q}" target="_self" aria-label="Open My Pantry">
    <div class="feature-copy"><h2>My Pantry</h2><p>See and manage<br>what’s in your kitchen.</p><span class="round-arrow">{icon('arrow')}</span></div>
    <img src="{artwork('pantry')}" alt="Two pantry jars with lime green lids">
   </a>
  </section>
  <nav class="preferences" aria-label="Food preferences">{preference_cards}</nav>
- <section class="recommendation-heading"><h2>This Week’s Recommendation</h2></section>
 </div>
 """)
 
 if remaining < 0:
     st.warning(f"You are ${abs(remaining):,.2f} over your weekly budget.")
 
-with st.container(key="recommendation_details"):
-    mode_label = st.radio("Find something delicious", ["Plan my meals", "Cook with what I have"], horizontal=True)
-    mode = "plan_my_meals" if mode_label == "Plan my meals" else "cook_with_what_i_have"
-    recommendations = None
-    try:
-        with st.spinner("Finding ideas for your kitchen…"):
-            recommendations = get_recommendations(mode)
-    except (OSError, ValueError, KeyError):
-        st.info("Recipe ideas are temporarily unavailable. Please try again later.")
-    results = recommendations.get("results", []) if recommendations is not None else []
-    if results:
-        result = results[0]
-        recipe = result["recipe"]
-        reasons = "".join(f"<li>{escape(reason)}</li>" for reason in result.get("reasons", []))
-        warnings = "".join(f'<p class="recipe-warning">{escape(warning)}</p>' for warning in result.get("warnings", []))
-        missing = result.get("missing_ingredients", [])
-        shopping = "Shopping list: " + labels(missing) if missing else "Your pantry has all the listed ingredients."
-        st.html(f"""
-        <div class="f4u"><article class="recipe-result">
-          <div class="recipe-top"><div><span class="eyebrow">PICKED FOR YOUR KITCHEN</span>
-          <h2>{escape(recipe['name'])}</h2>
-          <p class="recipe-meta">{escape(labels([recipe['cuisine']]))} · {recipe['time_minutes']} min · Estimated ${recipe['estimated_price']:.2f} per serving</p></div>
-          <a class="recipe-open" href="./Recipes" target="_self">View recipe {icon('arrow')}</a></div>
-          {f'<ul class="recipe-reasons">{reasons}</ul>' if reasons else ''}
-          {warnings}<p class="recipe-shopping">{escape(shopping)}</p>
-        </article></div>
-        """)
-    else:
-        st.info("No recipe suggestions yet. Add pantry items or review your dietary preferences to find your next meal.")
-    if not results:
-        st.page_link("pages/2_Recipes.py", label="Recipe Recommendation →")
+with st.container(key="home_recommendation_row"):
+    recommendation_column, explore_column = st.columns(2, gap="medium")
+    with recommendation_column:
+        with st.container(border=True, height="stretch", key="recommendation_details"):
+            st.subheader("This Week’s Recommendation")
+            mode_label = st.radio("Find something delicious", ["Plan my meals", "Cook with what I have"], horizontal=True)
+            mode = "plan_my_meals" if mode_label == "Plan my meals" else "cook_with_what_i_have"
+            recommendations = None
+            try:
+                with st.spinner("Finding ideas for your kitchen…"):
+                    recommendations = get_recommendations(mode)
+            except (OSError, ValueError, KeyError):
+                st.info("Recipe ideas are temporarily unavailable. Please try again later.")
+            results = recommendations.get("results", []) if recommendations is not None else []
+            if results:
+                result = results[0]
+                recipe = result["recipe"]
+                reasons = "".join(f"<li>{escape(reason)}</li>" for reason in result.get("reasons", []))
+                warnings = "".join(f'<p class="recipe-warning">{escape(warning)}</p>' for warning in result.get("warnings", []))
+                missing = result.get("missing_ingredients", [])
+                shopping = "Shopping list: " + labels(missing) if missing else "Your pantry has all the listed ingredients."
+                st.html(f"""
+                <div class="f4u"><article class="recipe-result">
+                  <div class="recipe-top"><div><span class="eyebrow">PICKED FOR YOUR KITCHEN</span>
+                  <h2>{escape(recipe['name'])}</h2>
+                  <p class="recipe-meta">{escape(labels([recipe['cuisine']]))} · {recipe['time_minutes']} min · Estimated ${recipe['estimated_price']:.2f} per serving</p></div>
+                  <a class="recipe-open" href="./Recipes{nick_q}" target="_self">View recipe {icon('arrow')}</a></div>
+                  {f'<ul class="recipe-reasons">{reasons}</ul>' if reasons else ''}
+                  {warnings}<p class="recipe-shopping">{escape(shopping)}</p>
+                </article></div>
+                """)
+            else:
+                st.info("No recipe suggestions yet. Add pantry items or review your dietary preferences to find your next meal.")
+            if not results:
+                st.page_link("pages/2_Recipes.py", label="Recipe Recommendation →")
+
+    with explore_column:
+        with st.container(border=True, height="stretch", key="explore_recipes"):
+            try:
+                recipe_catalog = load_recipes()
+                recipe_count = len(recipe_catalog)
+                cuisine_count = len({recipe["cuisine"] for recipe in recipe_catalog if recipe.get("cuisine")})
+                catalog_summary = (
+                    f'<div class="explore-facts"><div class="explore-fact"><strong>{recipe_count}</strong><span>Recipes to explore</span></div>'
+                    f'<div class="explore-fact"><strong>{cuisine_count}</strong><span>Cuisines to discover</span></div></div>'
+                )
+            except (OSError, ValueError, KeyError, TypeError):
+                catalog_summary = '<p class="explore-copy">Recipe counts are temporarily unavailable. You can still open Recipes.</p>'
+            st.html(f"""
+            <div class="f4u explore-content">
+              <h2>Explore Recipes</h2>
+              <p class="explore-copy">What are we cooking? Find a new favorite, revisit a familiar comfort, or make the most of what’s already in your pantry.</p>
+              <div class="explore-art" role="img" aria-label="A pan, avocado and noodle bowl">🍳🥑🍜</div>
+              {catalog_summary}
+              <p class="explore-copy">Browse by cuisine, save the dishes you love, and see what you need to buy.</p>
+              <a class="explore-action" href="./Recipes{nick_q}" target="_self">Explore all recipes →</a>
+            </div>
+            """)

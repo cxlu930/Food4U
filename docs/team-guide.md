@@ -24,9 +24,23 @@ Pages call these functions from `db.py`. They do not write SQL.
 | `get_pantry_items()` | Pantry items with `days_left` and `status` (`fresh`, `use_first`, `check_item`) |
 | `update_pantry_quantity(item_id, quantity)` | Change a quantity. 0 means used up |
 | `save_confirmed_receipt(receipt, items)` | Save a confirmed receipt and add recognized items to the pantry. Returns `False` if the same receipt was already saved |
-| `get_spending_summary()` | `budget`, `spent` (this week), `remaining` |
+| `get_budget_summary(period=None)` | Budget, spent, remaining, dates and `plan_budget` for the period the user chose (weekly or monthly). Dates follow the Vancouver calendar |
+| `get_spending_summary()` | The **weekly** `budget`, `spent`, `remaining`. Kept for older code; new code should use `get_budget_summary()` |
+| `add_favorite(recipe_id)` / `remove_favorite(recipe_id)` | Save or remove a favorite recipe (`recipe_id` is the `id` in `recipes.json`) |
+| `get_favorites()` | `recipe_id` of every favorite, most recently saved first |
 
 If you change a table in `db.py`, everyone must delete their local `food4u.db` once (`rm food4u.db`). Say so in the Pull Request.
+
+## Users (nicknames)
+
+Each visitor types a nickname and gets their own preferences, pantry, receipts and budget. There is no password: this separates visitors for the demo, it is not security.
+
+- You do not need to change your page. The `db.py` functions use the current visitor automatically, and show the nickname form if there is none yet.
+- The nickname is kept in the web address (`?u=amy`). A normal link that reloads the whole app (`<a href="./Pantry">`) loses it, so write such links as `href="./Pantry{nick_q}"` (see `app.py`). `st.page_link(...)` does not need this.
+- To let a page start with the nickname form even before it reads data, call `require_user()` (from `db`) at the top of the page.
+- "Switch user" is in the Settings menu on the Home page (it calls `sign_out()` from `db`).
+- Old databases upgrade themselves: existing rows go to the nickname `guest`. No need to delete `food4u.db`.
+- On Streamlit Cloud the database is reset when the app restarts, so every visitor's data is lost then.
 
 ## Git workflow
 

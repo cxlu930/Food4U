@@ -66,13 +66,22 @@ may only use these values:
 
 ```python
 {
-    "weekly_budget": 60.0,                 # float, in dollars
+    "weekly_budget": 60.0,                 # float, in dollars (CAD)
+    "monthly_budget": 400.0,               # float, saved separately from the weekly one (never weekly x 4)
+    "budget_period": "weekly",             # "weekly" or "monthly": which budget the app shows and uses
     "cuisines": ["chinese", "japanese"],   # values from CUISINES, chosen with a multiselect
     "spice_level": 2,                      # int key of SPICE_LEVELS: the highest level the user accepts (single choice)
     "flavor": ["savory", "sour"],          # list of TASTES the user likes (multiple choice), [] = no preference
     "avoid_tags": ["peanut", "dairy"],     # allergies and dietary restrictions, values from the tag list above
 }
 ```
+
+Budget rules:
+- Defaults when the user has never saved anything: `weekly_budget` 100.0, `monthly_budget` 400.0
+  (its own number, not weekly x 4), `budget_period` "weekly", `spice_level` 0.
+- A value the user saved is read as it is. A saved `0` stays `0`; it is never replaced by a default.
+- `save_preferences()` keeps any budget field the caller leaves out, so a page that only knows
+  `weekly_budget` does not erase the monthly budget or the chosen period.
 
 Dietary restrictions map to tags: vegetarian = `meat` (plus `fish`, `shellfish` if wanted),
 no pork = `pork`, no beef = `beef`. A's page shows friendly labels, but stores tags.
@@ -165,13 +174,32 @@ items = [
 
 ## 6. Spending summary (D provides, A reads)
 
-`get_spending_summary()` returns:
+`get_budget_summary(period=None)` is the one place that gives the budget numbers. Leave `period` out to
+get the period the user chose (`budget_period`); pass `"weekly"` or `"monthly"` to ask for one.
 
 ```python
-{"budget": 60.0, "spent": 23.4, "remaining": 36.6}
+{
+    "period": "monthly",         # "weekly" or "monthly"
+    "budget": 450.0,             # that period's budget
+    "spent": 23.4,               # total of the receipts the user CONFIRMED in that period
+    "remaining": 426.6,          # budget - spent (negative when over budget)
+    "start_date": "2026-11-01",  # first day of the period
+    "end_date": "2026-11-30",    # last day of the period
+    "days_left": 27,             # days left in the period, counting today
+    "plan_budget": 106.65,       # what ONE week of meal planning may cost (see below)
+}
 ```
 
-`spent` = sum of `Receipts.total_price` for the current week (Monday to Sunday).
+- Weekly = Monday to Sunday. Monthly = the calendar month. Dates follow the **Vancouver** calendar, not
+  the server's, so a Sunday evening in Vancouver is still Sunday on Streamlit Cloud.
+- `spent` sums `Receipts.total_price` by the receipt's `purchase_date` inside the period. Monthly spending
+  is never weekly spending x 4, and a receipt is counted once (a duplicate is refused when saving).
+- `plan_budget` is for the recommender: weekly = `remaining`; monthly = `remaining` divided by the
+  weeks left in the month (at least 1). Plan My Meals plans one week, so it must not spend the whole
+  monthly remainder.
+
+`get_spending_summary()` still exists for older code. It always returns the **weekly** numbers:
+`budget`, `spent`, `remaining` are exactly what they were (plus the extra keys above).
 
 ## 7. Functions in `db.py` (owner: D)
 
@@ -181,10 +209,24 @@ save_preferences(prefs: dict) -> None
 get_pantry_items() -> list[dict]
 save_confirmed_receipt(receipt: dict, items: list[dict]) -> None
 update_pantry_quantity(item_id: int, quantity: float) -> None   # 0 = used up
-get_spending_summary() -> dict
+get_spending_summary() -> dict              # weekly only, kept for older code
+get_budget_summary(period: str | None = None) -> dict   # section 6: the chosen period (or "weekly" / "monthly")
+add_favorite(recipe_id: int) -> None        # saving twice is fine
+remove_favorite(recipe_id: int) -> None     # removing one that is not saved is fine
+get_favorites() -> list[int]                # recipe_id of every favorite, most recently saved first
 ```
 
+`recipe_id` is the `id` of a recipe in `data/recipes.json` (an integer, unique). Favorites store only the
+id: to show a favorite, look the recipe up in `recipes.json` by that id. A recipe card knows whether it
+is a favorite by checking `recipe["id"] in get_favorites()` (call `get_favorites()` once per page run).
+
 A, B, C only call these. They never write SQL.
+
+**Users.** Every visitor enters a nickname, and all of the data above belongs to that nickname.
+Pages do NOT pass a user: each function finds the current visitor itself. If nobody has entered a
+nickname yet, the function shows the nickname form and stops the page, so a page never has to
+handle "no user". Every function also accepts an optional `user_id=` (used by tests and scripts).
+`get_pantry_items()` and the others only ever return the current user's rows.
 
 ## 8. Streamlit notes
 
