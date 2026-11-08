@@ -120,10 +120,10 @@ st.markdown("""
  background:#edf3d6; padding:24px !important; min-width:0;
 }
 .st-key-home_recommendation_row h3 { font-family:Arial,Helvetica,sans-serif !important; color:#111310; font-size:27px; font-weight:800; letter-spacing:-.7px; }
-.st-key-recommendation_details { gap:0; }
-.st-key-recommendation_details h3 { margin-bottom:0; padding-bottom:0; }
-.st-key-recommendation_details > [data-testid="stElementContainer"]:has([data-testid="stRadio"]) {
- margin-top:20px; margin-bottom:24px;
+.st-key-recommendation_details { gap:0 !important; }
+.st-key-recommendation_details h3 { margin-bottom:0 !important; padding-bottom:0 !important; }
+.st-key-recommendation_details [data-testid="stRadio"] {
+ margin:24px 0 !important;
 }
 .st-key-recommendation_details > [data-testid="stElementContainer"]:has([data-testid="stHtml"])
  ~ [data-testid="stElementContainer"]:has([data-testid="stHtml"]) { margin-top:16px; }
