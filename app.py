@@ -1,14 +1,17 @@
 import base64
 import json
+from hashlib import sha256
+from io import BytesIO
 from html import escape
 from pathlib import Path
 from urllib.parse import quote
 
 import streamlit as st
+from PIL import Image, UnidentifiedImageError
 
 from data.ingredients import INGREDIENTS, SPICE_LEVELS
-from db import current_user, get_preferences, get_budget_summary, init_db, save_preferences, sign_out
-from services.recommender import get_recommendations, load_recipes
+from db import current_user, get_preferences, get_pantry_items, get_budget_summary, get_spending_summary, init_db, save_preferences, sign_out
+from services.recommender import MODE_COOK, get_recommendations, load_recipes, recommend
 
 st.set_page_config(page_title="Food4U", page_icon="🌿", layout="wide")
 
@@ -43,6 +46,68 @@ def icon(name):
         "settings": '<circle cx="21" cy="21" r="7"/><path d="m17 3 8 0 1 6 5 3 6-2 4 7-5 4v5l5 4-4 7-6-2-5 3-1 5h-8l-1-5-5-3-6 2-4-7 5-4v-5l-5-4 4-7 6 2 5-3Z"/>',
     }
     return svg_image(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" fill="none" stroke="#111310" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">{paths[name]}</svg>')
+
+
+
+def home_fridge_recommendations():
+    """Scan into temporary recommender input; share the standalone scanner's session cache."""
+    with st.container(key="home_fridge_upload"):
+        st.markdown('<div class="fridge-heading"><span aria-hidden="true">📷</span> What’s in your fridge?</div>', unsafe_allow_html=True)
+        st.caption("Upload a photo to discover what you can cook.")
+        uploaded = st.file_uploader(
+            "Upload a fridge photo", type=["jpg", "jpeg", "png"],
+            key="home_fridge_photo", label_visibility="collapsed",
+        )
+    if uploaded is None:
+        return None
+
+    image_bytes = uploaded.getvalue()
+    try:
+        with Image.open(BytesIO(image_bytes)) as image:
+            if image.format not in ("JPEG", "PNG"):
+                raise ValueError("Unsupported image format.")
+            image.load()
+            mime_type = "image/jpeg" if image.format == "JPEG" else "image/png"
+            with st.expander("View fridge photo"):
+                st.image(image, width=280)
+    except (UnidentifiedImageError, OSError, ValueError, Image.DecompressionBombError):
+        st.error("Please upload a valid JPG or PNG image.")
+        return None
+
+    photo_id = sha256(image_bytes).hexdigest()
+    cache = st.session_state.setdefault("fridge_scan_cache", {})
+    if photo_id not in cache:
+        try:
+            from services.fridge_parser import scan_fridge
+
+            with st.spinner("Scanning your fridge with Gemini AI…"):
+                cache[photo_id] = scan_fridge(image_bytes, mime_type)
+        except Exception as error:
+            st.error(f"Fridge scanning failed: {error}")
+            return None
+
+    detected = cache[photo_id]
+    if not detected:
+        st.caption("No recognizable ingredients were found. Try a clearer photo.")
+        return None
+    tags = "".join(
+        f'<span class="fridge-tag">{escape(INGREDIENTS[name]["display_name"])}</span>'
+        for name in detected
+    )
+    st.html(f'<div class="fridge-detected"><span class="fridge-detected-label">Detected ingredients</span><div class="fridge-tags">{tags}</div></div>')
+    temporary_pantry = [
+        {"ingredient_name": name, "quantity": 1, "status": "fresh"}
+        for name in detected
+    ]
+    try:
+        return recommend(
+            recipes=load_recipes(), prefs=get_preferences(),
+            pantry_items=temporary_pantry, spent=get_spending_summary()["spent"],
+            mode=MODE_COOK,
+        )
+    except (OSError, ValueError, KeyError):
+        st.info("Recipe ideas are temporarily unavailable. Please try again later.")
+        return None
 
 
 st.markdown("""
@@ -112,14 +177,21 @@ st.markdown("""
 .f4u .recommendation-heading img { width:260px; height:200px; object-fit:contain; transform:rotate(-7deg); }
 .st-key-home_recommendation_row { margin-top:28px; }
 .st-key-home_recommendation_row [data-testid="stHorizontalBlock"]:has(.st-key-recommendation_details) {
- display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:stretch;
+ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start;
 }
 .st-key-home_recommendation_row [data-testid="stHorizontalBlock"]:has(.st-key-recommendation_details) > [data-testid="stColumn"] { width:100%; min-width:0; }
 .st-key-recommendation_details, .st-key-explore_recipes {
  border:1px solid #d6ddbf !important; border-radius:26px !important;
- background:#edf3d6; padding:24px !important; height:100%; min-width:0;
+ background:#edf3d6; padding:24px !important; min-width:0;
 }
 .st-key-home_recommendation_row h3 { font-family:Arial,Helvetica,sans-serif !important; color:#111310; font-size:27px; font-weight:800; letter-spacing:-.7px; }
+.st-key-recommendation_details { gap:0 !important; }
+.st-key-recommendation_details h3 { margin-bottom:0 !important; padding-bottom:0 !important; }
+.st-key-recommendation_details [data-testid="stRadio"] {
+ margin:24px 0 !important;
+}
+.st-key-recommendation_details > [data-testid="stElementContainer"]:has(.mini-recipe)
+ ~ [data-testid="stElementContainer"]:has(.mini-recipe) { margin-top:16px; }
 .st-key-home_recommendation_row .st-key-recommendation_details .recipe-result { border:0; padding:0; background:transparent; margin-top:6px; }
 .st-key-home_recommendation_row .st-key-recommendation_details .recipe-top { justify-content:flex-start; flex-wrap:wrap; gap:8px 14px; }
 .st-key-home_recommendation_row .st-key-recommendation_details .recipe-result h2 { font-size:25px; }
@@ -179,6 +251,55 @@ st.markdown("""
 }
 .st-key-recommendation_details [data-testid="stExpander"] summary { padding:12px 14px; }
 @media(max-width:760px) { .f4u .recipe-top { align-items:flex-start; flex-direction:column; } .f4u .recipe-result { padding:20px; } }
+
+
+
+.st-key-home_fridge_upload { background:#EDF3D8; border:1px dashed #a9b98b; border-radius:14px; padding:14px; gap:8px; margin-bottom:16px; }
+.st-key-home_fridge_upload .fridge-heading { font-size:16px; font-weight:750; color:#283619; }
+.st-key-home_fridge_upload .fridge-heading span { margin-right:6px; }
+.st-key-home_fridge_upload [data-testid="stFileUploaderDropzone"] { background:#fffdf7; border:0; border-radius:10px; padding:12px; }
+.st-key-home_fridge_upload [data-testid="stFileUploaderDropzone"] button { background:#C5E95D; border:1px solid #b6d650; color:#17240e; border-radius:999px; font-weight:700; }
+.st-key-home_fridge_upload [data-testid="stFileUploaderDropzoneInstructions"] { min-width:0; }
+.st-key-recommendation_details .fridge-detected { margin-bottom:16px; }
+.st-key-recommendation_details .fridge-detected-label { display:block; font-size:11px; color:#687347; margin-bottom:7px; }
+.st-key-recommendation_details .fridge-tags { display:flex; flex-wrap:wrap; gap:5px; }
+.st-key-recommendation_details .fridge-tag { padding:4px 8px; border-radius:999px; background:#fffdf7; border:1px solid #dce2cc; color:#405326; font-size:12px; }
+@media(max-width:760px) {
+ .st-key-home_fridge_upload [data-testid="stFileUploaderDropzone"] { flex-wrap:wrap; gap:8px; }
+}
+
+/* Home mini recipe details: native disclosure keeps expansion on this page. */
+.st-key-recommendation_details .mini-recipe { border:1px solid #d9dfcb; border-radius:16px; background:#fffdf7; overflow:hidden; font-family:Arial,Helvetica,sans-serif; color:#17240e; }
+.st-key-recommendation_details .mini-recipe > summary { display:flex; align-items:center; gap:12px; padding:16px 18px; cursor:pointer; list-style:none; }
+.st-key-recommendation_details .mini-recipe summary::-webkit-details-marker { display:none; }
+.st-key-recommendation_details .mini-recipe summary:focus-visible { outline:2px solid #819e27; outline-offset:-3px; border-radius:12px; }
+.st-key-recommendation_details .mini-header { flex:1; min-width:0; }
+.st-key-recommendation_details .mini-header strong { display:block; font-size:16px; line-height:1.35; }
+.st-key-recommendation_details .mini-meta { display:block; font-size:12px; line-height:1.5; color:#687347; margin-top:4px; }
+.st-key-recommendation_details .mini-chevron { align-self:flex-start; margin-top:2px; font-size:22px; color:#526b2e; transition:transform .15s; }
+.st-key-recommendation_details .mini-recipe[open] > summary .mini-chevron { transform:rotate(180deg); }
+.st-key-recommendation_details .mini-body { display:grid; gap:16px; padding:0 16px 16px; border-top:1px solid #ececdd; padding-top:14px; }
+.st-key-recommendation_details .mini-body h4 { font-family:inherit; font-size:14px; font-weight:750; margin:0 0 9px; padding:0; color:#283619; }
+.st-key-recommendation_details .mini-pills { display:flex; flex-wrap:wrap; gap:6px; }
+.st-key-recommendation_details .mini-pill { background:#fdf9f2; border:1px solid #e3e0d5; border-radius:999px; padding:5px 9px; font-size:12px; line-height:1.35; overflow-wrap:anywhere; max-width:100%; }
+.st-key-recommendation_details .mini-title { display:flex; gap:10px; align-items:baseline; }
+.st-key-recommendation_details .mini-rank { font-size:12px; font-weight:600; color:#85916d; flex-shrink:0; font-variant-numeric:tabular-nums; }
+.st-key-recommendation_details .mini-shopping { display:flex; align-items:flex-start; gap:8px; margin-top:11px; padding:8px; border-radius:8px; background:linear-gradient(90deg, rgba(255, 232, 166, 0.45) 0%, rgba(255, 246, 216, 0.22) 55%, transparent 100%); }
+.st-key-recommendation_details .mini-bag { width:15px; height:15px; flex-shrink:0; opacity:.55; margin-top:1px; }
+.st-key-recommendation_details .mini-shopping-label { font-size:9px; font-weight:700; letter-spacing:1px; color:#85916d; margin-right:8px; }
+.st-key-recommendation_details .mini-shopping-text { font-size:12px; line-height:1.6; color:#68705d; overflow-wrap:anywhere; }
+.st-key-recommendation_details .mini-steps { list-style:none; margin:0; padding:0; display:grid; gap:12px; }
+.st-key-recommendation_details .mini-steps li { display:flex; align-items:flex-start; gap:10px; }
+.st-key-recommendation_details .mini-number { display:flex; align-items:center; justify-content:center; flex:0 0 28px; height:28px; border-radius:9px; background:#c9e55b; color:#283619; font-size:12px; font-weight:800; }
+.st-key-recommendation_details .mini-steps p { margin:2px 0 0; font-size:13px; line-height:1.6; overflow-wrap:anywhere; }
+.st-key-recommendation_details .mini-why { border-top:1px solid #e8e8da; padding-top:10px; }
+.st-key-recommendation_details .mini-why summary { cursor:pointer; font-size:12px; color:#657044; }
+.st-key-recommendation_details .mini-why .mini-pills { margin-top:9px; }
+.st-key-recommendation_details .mini-note { font-size:12px; line-height:1.5; color:#76643f; margin:8px 0 0; }
+@media(max-width:760px) {
+ .st-key-recommendation_details .mini-recipe > summary { padding:12px; }
+ .st-key-recommendation_details .mini-body { padding:12px; gap:14px; }
+}
 
 .st-key-home_budget_cards { margin:8px 0 24px; }
 .st-key-home_budget_cards [data-testid="stHorizontalBlock"]:has(.st-key-home_budget_period_card) {
@@ -328,17 +449,45 @@ if remaining < 0:
 with st.container(key="home_recommendation_row"):
     recommendation_column, explore_column = st.columns(2, gap="medium")
     with recommendation_column:
-        with st.container(border=True, height="stretch", key="recommendation_details"):
+        with st.container(border=True, key="recommendation_details"):
             st.subheader("This Week’s Recommendation")
-            st.caption("Recipe recommendations currently use your weekly budget, including when the dashboard is in Monthly view.")
-            mode_label = st.radio("Find something delicious", ["Plan my meals", "Cook with what I have"], horizontal=True)
+            mode_label = st.radio(
+                "Recommendation mode", ["Plan my meals", "Cook with what I have"],
+                horizontal=True, label_visibility="collapsed",
+            )
             mode = "plan_my_meals" if mode_label == "Plan my meals" else "cook_with_what_i_have"
             recommendations = None
-            try:
-                with st.spinner("Finding ideas for your kitchen…"):
-                    recommendations = get_recommendations(mode)
-            except (OSError, ValueError, KeyError):
-                st.info("Recipe ideas are temporarily unavailable. Please try again later.")
+            if mode == MODE_COOK:
+                # Read saved stock on every rerun; scan caching must never cache Pantry results.
+                pantry = get_pantry_items()
+                pantry_revision = (current_user(), json.dumps(pantry, sort_keys=True))
+                if st.session_state.get("home_cook_pantry_revision") != pantry_revision:
+                    st.session_state["home_cook_pantry_revision"] = pantry_revision
+                    st.session_state["home_cook_source"] = "Saved pantry"
+                try:
+                    recommendations = get_recommendations(MODE_COOK)
+                except (OSError, ValueError, KeyError):
+                    st.info("Recipe ideas are temporarily unavailable. Please try again later.")
+
+                scanned_recommendations = home_fridge_recommendations()
+                source = "Saved pantry"
+                if scanned_recommendations is not None:
+                    source = st.radio(
+                        "Use ingredients from", ["Saved pantry", "Fridge photo"],
+                        horizontal=True, key="home_cook_source",
+                    )
+                    if source == "Fridge photo":
+                        recommendations = scanned_recommendations
+                has_usable_pantry = any(
+                    item.get("quantity", 0) > 0 and item.get("status") != "check_item"
+                    for item in pantry
+                )
+            else:
+                try:
+                    with st.spinner("Finding ideas for your kitchen…"):
+                        recommendations = get_recommendations(mode)
+                except (OSError, ValueError, KeyError):
+                    st.info("Recipe ideas are temporarily unavailable. Please try again later.")
             results = recommendations.get("results", []) if recommendations is not None else []
             if results:
                 try:
@@ -348,43 +497,53 @@ with st.container(key="home_recommendation_row"):
                     recipe_steps = {}
                 for rank, result in enumerate(results[:3], start=1):
                     recipe = result["recipe"]
-                    with st.expander(f"{rank}. {recipe['name']}"):
-                        st.caption(
-                            f"{labels([recipe['cuisine']])} · {recipe['time_minutes']} min · "
-                            f"Estimated ${recipe['estimated_price']:.2f} per serving"
-                        )
-                        for reason in result.get("reasons", []):
-                            st.write(reason)
-                        for warning in result.get("warnings", []):
-                            st.warning(warning)
-                        st.markdown("**Ingredients**")
-                        for ingredient in recipe.get("ingredients", []):
-                            st.write("• " + INGREDIENTS.get(ingredient, {}).get(
-                                "display_name", ingredient.replace("_", " ").title()
-                            ))
-                        st.markdown("**Missing ingredients**")
-                        missing = result.get("missing_ingredients", [])
-                        if missing:
-                            for ingredient in missing:
-                                st.write("• " + INGREDIENTS.get(ingredient, {}).get(
-                                    "display_name", ingredient.replace("_", " ").title()
-                                ))
-                        else:
-                            st.write("Your pantry has all the listed ingredients.")
-                        st.markdown("**Cooking instructions**")
-                        steps = recipe_steps.get(str(recipe["id"]), [])
-                        if steps:
-                            for number, step in enumerate(steps, start=1):
-                                st.write(f"{number}. {step['text']}")
-                        else:
-                            st.info("Cooking instructions are not available for this recipe yet.")
-            else:
-                st.info("No recipe suggestions yet. Add pantry items or review your dietary preferences to find your next meal.")
-            if not results:
-                st.page_link("pages/2_Recipes.py", label="Recipe Recommendation →")
+                    missing = result.get("missing_ingredients", [])
+                    shopping_text = ", ".join(
+                        INGREDIENTS.get(name, {}).get("display_name", name.replace("_", " ").title())
+                        for name in missing
+                    ) if missing else "You have everything you need!"
+                    bag_icon = svg_image('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 7h14l1 14H4L5 7Z"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/></svg>', "mini-bag")
+                    shopping = (
+                        f'<span class="mini-shopping">{bag_icon}<span><span class="mini-shopping-label">TO BUY</span>'
+                        f'<span class="mini-shopping-text">{escape(shopping_text)}</span></span></span>'
+                    )
+                    steps = recipe_steps.get(str(recipe["id"]), [])
+                    instructions = "".join(
+                        f'<li><span class="mini-number" aria-hidden="true">{number:02d}</span><p>{escape(step["text"])}</p></li>'
+                        for number, step in enumerate(steps, start=1)
+                    )
+                    reasons = "".join(f'<span class="mini-pill">{escape(reason)}</span>' for reason in result.get("reasons", []))
+                    warnings = "".join(f'<p class="mini-note">{escape(warning)}</p>' for warning in result.get("warnings", []))
+                    why = f'<details class="mini-why"><summary>Why this recipe?</summary><div class="mini-pills">{reasons}</div>{warnings}</details>' if reasons or warnings else ""
+                    st.html(f"""
+                    <details class="mini-recipe">
+                      <summary><span class="mini-header"><span class="mini-title"><span class="mini-rank">{rank:02d}</span><strong>{escape(recipe['name'])}</strong></span>
+                        <span class="mini-meta">{escape(labels([recipe['cuisine']]))} · {recipe['time_minutes']} min · Estimated ${recipe['estimated_price']:.2f} per serving</span>
+                        {shopping}
+                      </span><span class="mini-chevron" aria-hidden="true">⌄</span></summary>
+                      <div class="mini-body">
+                        <section><h4>Let's cook!</h4>
+                          {f'<ol class="mini-steps">{instructions}</ol>' if instructions else '<p class="mini-note">Cooking instructions are not available for this recipe yet.</p>'}
+                        </section>
+                        {why}
+                      </div>
+                    </details>
+                    """)
+            elif recommendations is not None:
+                st.caption(
+                    (
+                        "No recipes match this photo yet. Try another photo with more visible ingredients."
+                        if source == "Fridge photo"
+                        else "No recipes match your saved pantry yet. Add groceries or try a fridge photo."
+                        if has_usable_pantry
+                        else "Add groceries to your pantry or upload a fridge photo to get started."
+                    )
+                    if mode == MODE_COOK
+                    else "No recipe suggestions yet. Review your dietary preferences to find your next meal."
+                )
 
     with explore_column:
-        with st.container(border=True, height="stretch", key="explore_recipes"):
+        with st.container(border=True, key="explore_recipes"):
             try:
                 recipe_catalog = load_recipes()
                 recipe_count = len(recipe_catalog)
