@@ -1,7 +1,7 @@
 import streamlit as st
 
 from data.ingredients import CUISINES, INGREDIENTS
-from db import init_db
+from db import add_favorite, get_favorites, init_db, remove_favorite
 from services.recommender import MODE_COOK, MODE_PLAN, get_recommendations
 
 st.set_page_config(page_title="Recipes · Food4U", page_icon="🍽️", layout="wide")
@@ -77,6 +77,7 @@ st.markdown(
     .st-key-recipes_page [class*="st-key-recipe_card_"] [data-testid="stCaptionContainer"] { color:#657044; }
     .st-key-recipes_page [class*="st-key-recipe_card_"] [data-testid="stHorizontalBlock"] { align-items:flex-start; }
     .st-key-recipes_page .f4u-emoji { background:#D2E39A; }
+    .st-key-recipes_page [class*="st-key-fav_"] button { font-size:26px; padding:0; min-height:0; }
     .st-key-recipes_page [data-testid="stAlertContainer"] { border-radius:14px; }
     .st-key-recipes_page [data-testid="stAlertContainer"]:has([data-testid="stAlertContentWarning"]) { background:#fff3c0; color:#9F6634; }
     .st-key-recipes_page [data-testid="stAlertContainer"]:has([data-testid="stAlertContentInfo"]) { background:#edf2da; color:#405326; }
@@ -101,7 +102,7 @@ def spice_text(level):
     return "🌶️" * level if level else "Not spicy"
 
 
-def render_card(result):
+def render_card(result, favorites):
     recipe = result["recipe"]
     cuisine = recipe.get("cuisine", "")
     emoji = CUISINE_EMOJI.get(cuisine, "🍽️")
@@ -111,7 +112,15 @@ def render_card(result):
         with left:
             st.markdown(f'<div class="f4u-emoji">{emoji}</div>', unsafe_allow_html=True)
         with right:
-            st.markdown(f"**{recipe['name']}**")
+            name_col, heart_col = st.columns([6, 1], vertical_alignment="center")
+            name_col.markdown(f"**{recipe['name']}**")
+            is_favorite = recipe["id"] in favorites
+            if heart_col.button(
+                "❤️" if is_favorite else "🤍", key=f"fav_{recipe['id']}", type="tertiary",
+                help="Remove from favorites" if is_favorite else "Save to favorites",
+            ):
+                (remove_favorite if is_favorite else add_favorite)(recipe["id"])
+                st.rerun()
             st.caption(
                 f"{cuisine.replace('_', ' ').title()} · "
                 f"${recipe.get('estimated_price', 0):.2f} · "
@@ -150,6 +159,7 @@ with st.container(key="recipes_page"):
     st.caption(description)
 
     data = get_recommendations(mode)
+    favorites = get_favorites()  # recipe ids, most recently saved first
 
     if data["using_default_budget"]:
         st.info("Using default budget of $100. Set your own in Preferences.")
@@ -157,21 +167,42 @@ with st.container(key="recipes_page"):
         st.info("Using default spice level: Not spicy. Set your own in Preferences.")
 
     # ---------- Cuisine filters and recipe cards ----------
+    results = data["results"]
+    # Favorites only show recipes that fit the user's preferences right now (allergies are never skipped).
+    by_id = {result["recipe"]["id"]: result for result in results}
+    shown_favorites = [by_id[fid] for fid in favorites if fid in by_id]
+
     selected_cuisine = st.radio(
-        "Cuisine", ["all"] + list(CUISINES), horizontal=True,
-        format_func=lambda value: "All" if value == "all" else value.title(),
+        "Cuisine", ["all", "favorites"] + list(CUISINES), horizontal=True,
+        format_func=lambda value: (
+            "All" if value == "all"
+            else f"❤️ Favorites ({len(shown_favorites)})" if value == "favorites"
+            else value.title()
+        ),
         key="recipes_cuisine",
     )
-    results = data["results"]
-    filtered_results = [
-        result for result in results
-        if selected_cuisine == "all" or result["recipe"]["cuisine"] == selected_cuisine
-    ]
-    category_label = "All cuisines" if selected_cuisine == "all" else selected_cuisine.title()
+    if selected_cuisine == "favorites":
+        filtered_results = shown_favorites
+        category_label = "Favorites"
+    else:
+        filtered_results = [
+            result for result in results
+            if selected_cuisine == "all" or result["recipe"]["cuisine"] == selected_cuisine
+        ]
+        category_label = "All cuisines" if selected_cuisine == "all" else selected_cuisine.title()
     st.subheader(category_label)
-    st.caption(f"{len(filtered_results)} recipe{'s' if len(filtered_results) != 1 else ''} · Recommended order")
+    order_text = "Most recently saved first" if selected_cuisine == "favorites" else "Recommended order"
+    st.caption(f"{len(filtered_results)} recipe{'s' if len(filtered_results) != 1 else ''} · {order_text}")
 
-    if not filtered_results:
+    if selected_cuisine == "favorites" and len(favorites) > len(shown_favorites):
+        st.info(
+            f"{len(favorites) - len(shown_favorites)} saved recipe(s) are hidden because they do not "
+            "fit your preferences or this mode right now."
+        )
+
+    if not filtered_results and selected_cuisine == "favorites":
+        st.info("No favorites to show yet. Tap the heart on a recipe to save it.")
+    elif not filtered_results:
         if results:
             st.info(
                 f"No {category_label.lower()} recipes match your current settings. "
@@ -190,4 +221,4 @@ with st.container(key="recipes_page"):
             columns = st.columns(2, gap="medium")
             for column, result in zip(columns, filtered_results[start:start + 2]):
                 with column:
-                    render_card(result)
+                    render_card(result, favorites)
