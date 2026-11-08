@@ -104,11 +104,10 @@ def spice_text(level):
     return "🌶️" * level if level else "Not spicy"
 
 
-<<<<<<< HEAD
-def render_card(result, mode):
-=======
-def render_card(result, favorites):
->>>>>>> 73a92b9c35e10b6bf5dd88681560ec61c10dfaeb
+def render_card(result, favorites, mode=None):
+    """Draw one recipe card with a favorite heart.
+    `mode` is the recommendation mode; leave it None where there is no mode
+    (then missing ingredients always show as "Need to buy")."""
     recipe = result["recipe"]
     cuisine = recipe.get("cuisine", "")
     emoji = CUISINE_EMOJI.get(cuisine, "🍽️")
@@ -179,27 +178,6 @@ with st.container(key="recipes_page"):
     by_id = {result["recipe"]["id"]: result for result in results}
     shown_favorites = [by_id[fid] for fid in favorites if fid in by_id]
 
-<<<<<<< HEAD
-# ---------- Recipe cards ----------
-results = data["results"]
-if not results and mode == MODE_COOK:
-    st.info(
-        "Nothing you can cook with your current pantry. Try Plan My Meals to see "
-        "what to buy, or add ingredients in Pantry."
-    )
-    st.page_link("pages/4_Pantry.py", label="Go to Pantry", icon="🧺")
-elif not results:
-    st.info(
-        "No recipes match right now. Try adjusting your settings in Preferences, "
-        "or add ingredients to your Pantry."
-    )
-    link_left, link_right = st.columns(2)
-    link_left.page_link("pages/1_Preferences.py", label="Go to Preferences", icon="⚙️")
-    link_right.page_link("pages/4_Pantry.py", label="Go to Pantry", icon="🧺")
-else:
-    for result in results:
-        render_card(result, mode)
-=======
     selected_cuisine = st.radio(
         "Cuisine", ["all", "favorites"] + list(CUISINES), horizontal=True,
         format_func=lambda value: (
@@ -230,6 +208,12 @@ else:
 
     if not filtered_results and selected_cuisine == "favorites":
         st.info("No favorites to show yet. Tap the heart on a recipe to save it.")
+    elif not results and mode == MODE_COOK:
+        st.info(
+            "Nothing you can cook with your current pantry. Try Plan My Meals to see "
+            "what to buy, or add ingredients in Pantry."
+        )
+        st.page_link("pages/4_Pantry.py", label="Go to Pantry", icon="🧺")
     elif not filtered_results:
         if results:
             st.info(
@@ -249,5 +233,4 @@ else:
             columns = st.columns(2, gap="medium")
             for column, result in zip(columns, filtered_results[start:start + 2]):
                 with column:
-                    render_card(result, favorites)
->>>>>>> 73a92b9c35e10b6bf5dd88681560ec61c10dfaeb
+                    render_card(result, favorites, mode)
