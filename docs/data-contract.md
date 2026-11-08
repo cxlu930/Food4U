@@ -182,7 +182,14 @@ get_pantry_items() -> list[dict]
 save_confirmed_receipt(receipt: dict, items: list[dict]) -> None
 update_pantry_quantity(item_id: int, quantity: float) -> None   # 0 = used up
 get_spending_summary() -> dict
+add_favorite(recipe_id: int) -> None        # saving twice is fine
+remove_favorite(recipe_id: int) -> None     # removing one that is not saved is fine
+get_favorites() -> list[int]                # recipe_id of every favorite, most recently saved first
 ```
+
+`recipe_id` is the `id` of a recipe in `data/recipes.json` (an integer, unique). Favorites store only the
+id: to show a favorite, look the recipe up in `recipes.json` by that id. A recipe card knows whether it
+is a favorite by checking `recipe["id"] in get_favorites()` (call `get_favorites()` once per page run).
 
 A, B, C only call these. They never write SQL.
 

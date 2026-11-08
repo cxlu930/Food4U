@@ -25,6 +25,8 @@ Pages call these functions from `db.py`. They do not write SQL.
 | `update_pantry_quantity(item_id, quantity)` | Change a quantity. 0 means used up |
 | `save_confirmed_receipt(receipt, items)` | Save a confirmed receipt and add recognized items to the pantry. Returns `False` if the same receipt was already saved |
 | `get_spending_summary()` | `budget`, `spent` (this week), `remaining` |
+| `add_favorite(recipe_id)` / `remove_favorite(recipe_id)` | Save or remove a favorite recipe (`recipe_id` is the `id` in `recipes.json`) |
+| `get_favorites()` | `recipe_id` of every favorite, most recently saved first |
 
 If you change a table in `db.py`, everyone must delete their local `food4u.db` once (`rm food4u.db`). Say so in the Pull Request.
 
