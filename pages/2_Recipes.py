@@ -177,7 +177,7 @@ with st.container(key="recipes_page"):
         format_func=lambda value: (
             "All" if value == "all"
             else f"❤️ Favorites ({len(shown_favorites)})" if value == "favorites"
-            else value.title()
+            else f"{CUISINE_EMOJI[value]} {value.title()}"
         ),
         key="recipes_cuisine",
     )
