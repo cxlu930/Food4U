@@ -119,6 +119,28 @@ Spice level and taste options on the preferences page are read directly from
   to `recipes.json`, since we cannot promise it is safe for users with allergies.
 - A recipe is excluded if any of its ingredients has a tag in the user's `avoid_tags`.
 
+## 3b. Recipe steps (`data/recipe_steps.json`)
+
+How to cook each recipe: exactly four short steps, keyed by the recipe `id` (as text).
+
+```json
+{
+  "1": [
+    {"text": "Cook the rice. Cut the tomatoes into wedges and slice the green onion.",
+     "ingredients": ["rice", "tomato", "green_onion"]},
+    ...
+  ]
+}
+```
+
+- `ingredients` lists the recipe ingredients named in that step (keys of `INGREDIENTS`, in the order they
+  appear). Use it for icons, for example the ingredient emoji next to the step.
+- A step only mentions ingredients the recipe lists, and every ingredient of the recipe appears in at least
+  one step. Water, pans and pots are not ingredients. This was checked by script for all 48 recipes.
+- Wording for meat, fish and egg says "until cooked through" or "no longer pink". We do not state
+  temperatures for meat: reminders are not food-safety guarantees. If you add or change a recipe, change its
+  steps in the same Pull Request.
+
 ## 4. Pantry item (D provides, B and Pantry page read)
 
 Returned by `get_pantry_items()` as a list of dicts:

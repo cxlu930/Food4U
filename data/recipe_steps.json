@@ -1,0 +1,1673 @@
+{
+ "1": [
+  {
+   "text": "Cook the rice. Cut the tomatoes into wedges and slice the green onion.",
+   "ingredients": [
+    "rice",
+    "tomato",
+    "green_onion"
+   ]
+  },
+  {
+   "text": "Beat the eggs with a pinch of salt. Heat oil in a pan, scramble the eggs until just set, then take them out.",
+   "ingredients": [
+    "egg",
+    "salt",
+    "vegetable_oil"
+   ]
+  },
+  {
+   "text": "In the same pan, cook the tomatoes until soft and juicy. Stir in the sugar and a little salt.",
+   "ingredients": [
+    "tomato",
+    "sugar",
+    "salt"
+   ]
+  },
+  {
+   "text": "Return the eggs to the pan and mix gently. Top with green onion and serve over the rice.",
+   "ingredients": [
+    "egg",
+    "green_onion",
+    "rice"
+   ]
+  }
+ ],
+ "2": [
+  {
+   "text": "Boil the pasta in water with a generous pinch of salt until tender, then drain.",
+   "ingredients": [
+    "pasta",
+    "salt"
+   ]
+  },
+  {
+   "text": "Melt the butter in a pot, stir in the flour and cook for 1 minute.",
+   "ingredients": [
+    "butter",
+    "flour"
+   ]
+  },
+  {
+   "text": "Slowly pour in the milk while stirring and cook until the sauce thickens. Stir in the cheese until melted.",
+   "ingredients": [
+    "milk",
+    "cheese"
+   ]
+  },
+  {
+   "text": "Mix in the pasta, season with black pepper and a little salt, and serve hot.",
+   "ingredients": [
+    "pasta",
+    "black_pepper",
+    "salt"
+   ]
+  }
+ ],
+ "3": [
+  {
+   "text": "Use cooled, cooked rice. Dice the carrot and onion and slice the green onion.",
+   "ingredients": [
+    "rice",
+    "carrot",
+    "onion",
+    "green_onion"
+   ]
+  },
+  {
+   "text": "Heat oil in a pan. Scramble the beaten eggs until just set and set them aside.",
+   "ingredients": [
+    "vegetable_oil",
+    "egg"
+   ]
+  },
+  {
+   "text": "Fry the carrot and onion until soft, then add the rice and stir until hot.",
+   "ingredients": [
+    "carrot",
+    "onion",
+    "rice"
+   ]
+  },
+  {
+   "text": "Add the eggs, soy sauce and a pinch of salt. Toss well and finish with green onion.",
+   "ingredients": [
+    "egg",
+    "soy_sauce",
+    "salt",
+    "green_onion"
+   ]
+  }
+ ],
+ "4": [
+  {
+   "text": "Cook the rice. Cut the tofu into cubes and mince the garlic and ginger.",
+   "ingredients": [
+    "rice",
+    "tofu",
+    "garlic",
+    "ginger"
+   ]
+  },
+  {
+   "text": "Heat oil and brown the ground pork until cooked through. Add the garlic, ginger and doubanjiang and stir until fragrant.",
+   "ingredients": [
+    "vegetable_oil",
+    "ground_pork",
+    "garlic",
+    "ginger",
+    "doubanjiang"
+   ]
+  },
+  {
+   "text": "Add a splash of water, the soy sauce and chili powder. Add the tofu and simmer gently for 5 minutes.",
+   "ingredients": [
+    "soy_sauce",
+    "chili_powder",
+    "tofu"
+   ]
+  },
+  {
+   "text": "Sprinkle with sliced green onion and serve over the rice.",
+   "ingredients": [
+    "green_onion",
+    "rice"
+   ]
+  }
+ ],
+ "5": [
+  {
+   "text": "Cut the pork ribs into pieces. Boil them in water for 5 minutes, then drain and rinse.",
+   "ingredients": [
+    "pork_ribs"
+   ]
+  },
+  {
+   "text": "Heat oil, add the sugar and let it melt to a light brown. Add the ribs, ginger and green onion and stir well.",
+   "ingredients": [
+    "vegetable_oil",
+    "sugar",
+    "ginger",
+    "green_onion"
+   ]
+  },
+  {
+   "text": "Pour in the soy sauce and enough water to nearly cover the ribs. Cover and simmer 30 to 40 minutes, until tender and cooked through.",
+   "ingredients": [
+    "soy_sauce"
+   ]
+  },
+  {
+   "text": "Cook the rice while the ribs simmer. Turn up the heat to thicken the sauce, then serve over the rice.",
+   "ingredients": [
+    "rice"
+   ]
+  }
+ ],
+ "6": [
+  {
+   "text": "Cook the rice. Cut the chicken, potato, bell pepper and onion into bite-size pieces.",
+   "ingredients": [
+    "rice",
+    "chicken",
+    "potato",
+    "bell_pepper",
+    "onion"
+   ]
+  },
+  {
+   "text": "Heat oil and brown the chicken. Add the garlic, ginger, doubanjiang and chili powder and stir until fragrant.",
+   "ingredients": [
+    "vegetable_oil",
+    "chicken",
+    "garlic",
+    "ginger",
+    "doubanjiang",
+    "chili_powder"
+   ]
+  },
+  {
+   "text": "Add the soy sauce, sugar, potato and enough water to half cover. Cover and simmer 15 minutes, until the potato is soft.",
+   "ingredients": [
+    "soy_sauce",
+    "sugar",
+    "potato"
+   ]
+  },
+  {
+   "text": "Add the bell pepper and onion and cook 5 more minutes. Make sure the chicken is cooked through, then serve over the rice.",
+   "ingredients": [
+    "bell_pepper",
+    "onion",
+    "chicken",
+    "rice"
+   ]
+  }
+ ],
+ "7": [
+  {
+   "text": "Cook the rice. Slice the mushrooms, mince the garlic and cut the bok choy into pieces.",
+   "ingredients": [
+    "rice",
+    "mushroom",
+    "garlic",
+    "bok_choy"
+   ]
+  },
+  {
+   "text": "Heat oil in a pan and cook the mushrooms until golden.",
+   "ingredients": [
+    "vegetable_oil",
+    "mushroom"
+   ]
+  },
+  {
+   "text": "Add the garlic for 30 seconds, then the bok choy. Stir-fry until the leaves wilt.",
+   "ingredients": [
+    "garlic",
+    "bok_choy"
+   ]
+  },
+  {
+   "text": "Season with soy sauce and salt and serve with the rice.",
+   "ingredients": [
+    "soy_sauce",
+    "salt",
+    "rice"
+   ]
+  }
+ ],
+ "8": [
+  {
+   "text": "Cook the rice. Slice the onion and cut the chicken into small pieces.",
+   "ingredients": [
+    "rice",
+    "onion",
+    "chicken"
+   ]
+  },
+  {
+   "text": "Simmer the dashi, soy sauce and sugar in a pan. Add the onion and chicken and cook until the chicken is cooked through.",
+   "ingredients": [
+    "dashi",
+    "soy_sauce",
+    "sugar",
+    "onion",
+    "chicken"
+   ]
+  },
+  {
+   "text": "Pour in the beaten eggs, cover and cook until just set.",
+   "ingredients": [
+    "egg"
+   ]
+  },
+  {
+   "text": "Slide everything over a bowl of rice and top with green onion.",
+   "ingredients": [
+    "rice",
+    "green_onion"
+   ]
+  }
+ ],
+ "9": [
+  {
+   "text": "Cook the rice. Cut the chicken, potato, carrot and onion into bite-size pieces.",
+   "ingredients": [
+    "rice",
+    "chicken",
+    "potato",
+    "carrot",
+    "onion"
+   ]
+  },
+  {
+   "text": "Heat oil in a pot and cook the onion and chicken until the chicken is no longer pink.",
+   "ingredients": [
+    "vegetable_oil",
+    "onion",
+    "chicken"
+   ]
+  },
+  {
+   "text": "Add the potato, carrot and enough water to cover. Simmer 15 minutes until soft.",
+   "ingredients": [
+    "potato",
+    "carrot"
+   ]
+  },
+  {
+   "text": "Turn off the heat, stir in the curry roux until melted, then simmer 5 minutes. Serve over the rice.",
+   "ingredients": [
+    "curry_roux",
+    "rice"
+   ]
+  }
+ ],
+ "10": [
+  {
+   "text": "Cook the rice. Cut the tofu into small cubes and slice the green onion.",
+   "ingredients": [
+    "rice",
+    "tofu",
+    "green_onion"
+   ]
+  },
+  {
+   "text": "Heat the dashi in a pot until it is hot but not boiling hard.",
+   "ingredients": [
+    "dashi"
+   ]
+  },
+  {
+   "text": "Add the tofu and warm it through for 2 minutes.",
+   "ingredients": [
+    "tofu"
+   ]
+  },
+  {
+   "text": "Stir the miso into a ladle of hot dashi until smooth, return it to the pot, add the green onion and serve with the rice.",
+   "ingredients": [
+    "miso",
+    "dashi",
+    "green_onion",
+    "rice"
+   ]
+  }
+ ],
+ "11": [
+  {
+   "text": "Cook the rice. Mix the soy sauce, sugar and grated ginger to make the sauce.",
+   "ingredients": [
+    "rice",
+    "soy_sauce",
+    "sugar",
+    "ginger"
+   ]
+  },
+  {
+   "text": "Heat oil in a pan and cook the salmon for 4 minutes (skin side down if it has skin), then flip and cook 3 more minutes.",
+   "ingredients": [
+    "vegetable_oil",
+    "salmon"
+   ]
+  },
+  {
+   "text": "Pour the sauce over the salmon and simmer until glossy and the salmon is cooked through.",
+   "ingredients": [
+    "salmon"
+   ]
+  },
+  {
+   "text": "Steam or boil the broccoli until tender and serve it with the salmon and rice.",
+   "ingredients": [
+    "broccoli",
+    "salmon",
+    "rice"
+   ]
+  }
+ ],
+ "12": [
+  {
+   "text": "Beat the eggs. Mix in the sugar, soy sauce, dashi and a pinch of salt.",
+   "ingredients": [
+    "egg",
+    "sugar",
+    "soy_sauce",
+    "dashi",
+    "salt"
+   ]
+  },
+  {
+   "text": "Lightly oil a small pan over medium-low heat and pour in a thin layer of the egg mixture.",
+   "ingredients": [
+    "vegetable_oil",
+    "egg"
+   ]
+  },
+  {
+   "text": "When it is almost set, roll it up to one side of the pan.",
+   "ingredients": []
+  },
+  {
+   "text": "Oil the pan again, pour in more egg, roll the omelette over it and repeat until the egg is used up. Make sure the egg is fully set, then slice and serve.",
+   "ingredients": [
+    "vegetable_oil",
+    "egg"
+   ]
+  }
+ ],
+ "13": [
+  {
+   "text": "Cook the rice. Thinly slice the beef and the onion and grate the ginger.",
+   "ingredients": [
+    "rice",
+    "beef",
+    "onion",
+    "ginger"
+   ]
+  },
+  {
+   "text": "Simmer the dashi, soy sauce and sugar in a pan. Add the onion and cook until soft.",
+   "ingredients": [
+    "dashi",
+    "soy_sauce",
+    "sugar",
+    "onion"
+   ]
+  },
+  {
+   "text": "Add the beef and ginger and cook until the beef is no longer pink.",
+   "ingredients": [
+    "beef",
+    "ginger"
+   ]
+  },
+  {
+   "text": "Spoon over a bowl of rice and finish with a pinch of chili powder.",
+   "ingredients": [
+    "rice",
+    "chili_powder"
+   ]
+  }
+ ],
+ "14": [
+  {
+   "text": "Use cooled, cooked rice. Chop the kimchi and onion and slice the green onion.",
+   "ingredients": [
+    "rice",
+    "kimchi",
+    "onion",
+    "green_onion"
+   ]
+  },
+  {
+   "text": "Heat oil in a pan and cook the onion and kimchi until the kimchi softens.",
+   "ingredients": [
+    "vegetable_oil",
+    "onion",
+    "kimchi"
+   ]
+  },
+  {
+   "text": "Add the rice, gochujang and soy sauce and stir-fry until hot and evenly coated.",
+   "ingredients": [
+    "rice",
+    "gochujang",
+    "soy_sauce"
+   ]
+  },
+  {
+   "text": "Top with a fried egg (cooked until the white is set), a drizzle of sesame oil and the green onion.",
+   "ingredients": [
+    "egg",
+    "sesame_oil",
+    "green_onion"
+   ]
+  }
+ ],
+ "15": [
+  {
+   "text": "Cook the rice. Cut the carrot into thin strips and mince the garlic.",
+   "ingredients": [
+    "rice",
+    "carrot",
+    "garlic"
+   ]
+  },
+  {
+   "text": "Cook the ground beef in oil with the garlic and soy sauce until browned and cooked through.",
+   "ingredients": [
+    "ground_beef",
+    "vegetable_oil",
+    "garlic",
+    "soy_sauce"
+   ]
+  },
+  {
+   "text": "Quickly cook the carrot, spinach and bean sprouts one at a time, seasoning each with a little salt and sesame oil.",
+   "ingredients": [
+    "carrot",
+    "spinach",
+    "bean_sprouts",
+    "salt",
+    "sesame_oil"
+   ]
+  },
+  {
+   "text": "Fry an egg. Put everything on the rice, add the egg and gochujang, sprinkle with sesame seeds and mix before eating.",
+   "ingredients": [
+    "egg",
+    "rice",
+    "gochujang",
+    "sesame_seeds"
+   ]
+  }
+ ],
+ "16": [
+  {
+   "text": "Cook the rice. Cut the chicken, cabbage, onion and carrot into bite-size pieces.",
+   "ingredients": [
+    "rice",
+    "chicken",
+    "cabbage",
+    "onion",
+    "carrot"
+   ]
+  },
+  {
+   "text": "Mix the gochujang, chili powder, soy sauce, sugar, garlic and sesame oil into a sauce. Toss the chicken in it.",
+   "ingredients": [
+    "gochujang",
+    "chili_powder",
+    "soy_sauce",
+    "sugar",
+    "garlic",
+    "sesame_oil",
+    "chicken"
+   ]
+  },
+  {
+   "text": "Heat oil in a large pan and cook the chicken until it is no longer pink in the middle.",
+   "ingredients": [
+    "vegetable_oil",
+    "chicken"
+   ]
+  },
+  {
+   "text": "Add the cabbage, onion and carrot and stir-fry until soft, then serve with the rice.",
+   "ingredients": [
+    "cabbage",
+    "onion",
+    "carrot",
+    "rice"
+   ]
+  }
+ ],
+ "17": [
+  {
+   "text": "Cook the rice. Thinly slice the beef, onion and carrot and mince the garlic.",
+   "ingredients": [
+    "rice",
+    "beef",
+    "onion",
+    "carrot",
+    "garlic"
+   ]
+  },
+  {
+   "text": "Mix the soy sauce, sugar, garlic and sesame oil. Coat the beef in it and rest for 15 minutes.",
+   "ingredients": [
+    "soy_sauce",
+    "sugar",
+    "garlic",
+    "sesame_oil",
+    "beef"
+   ]
+  },
+  {
+   "text": "Heat oil in a pan and cook the onion and carrot for 3 minutes.",
+   "ingredients": [
+    "vegetable_oil",
+    "onion",
+    "carrot"
+   ]
+  },
+  {
+   "text": "Add the beef and cook until browned and no longer pink. Top with sesame seeds and green onion and serve with the rice.",
+   "ingredients": [
+    "beef",
+    "sesame_seeds",
+    "green_onion",
+    "rice"
+   ]
+  }
+ ],
+ "18": [
+  {
+   "text": "Cook the rice. Slice the green onion.",
+   "ingredients": [
+    "rice",
+    "green_onion"
+   ]
+  },
+  {
+   "text": "Beat the eggs with a pinch of salt and about the same amount of water until smooth.",
+   "ingredients": [
+    "egg",
+    "salt"
+   ]
+  },
+  {
+   "text": "Pour into a heatproof bowl and steam over low heat for 12 to 15 minutes, until set.",
+   "ingredients": []
+  },
+  {
+   "text": "Top with the green onion and a few drops of sesame oil and serve with the rice.",
+   "ingredients": [
+    "green_onion",
+    "sesame_oil",
+    "rice"
+   ]
+  }
+ ],
+ "19": [
+  {
+   "text": "Cook the rice. Chop the kimchi and onion, cube the tofu and mince the garlic.",
+   "ingredients": [
+    "rice",
+    "kimchi",
+    "onion",
+    "tofu",
+    "garlic"
+   ]
+  },
+  {
+   "text": "Heat oil in a pot and brown the ground pork. Add the onion, garlic and kimchi and cook for 3 minutes.",
+   "ingredients": [
+    "vegetable_oil",
+    "ground_pork",
+    "onion",
+    "garlic",
+    "kimchi"
+   ]
+  },
+  {
+   "text": "Stir in the gochujang and chili powder, add water to cover and simmer for 15 minutes.",
+   "ingredients": [
+    "gochujang",
+    "chili_powder"
+   ]
+  },
+  {
+   "text": "Add the tofu and simmer 5 more minutes, until the ground pork is cooked through. Top with green onion and serve with the rice.",
+   "ingredients": [
+    "tofu",
+    "ground_pork",
+    "green_onion",
+    "rice"
+   ]
+  }
+ ],
+ "20": [
+  {
+   "text": "Cook the rice. Cut the chicken into pieces and finely chop the onion, garlic and ginger.",
+   "ingredients": [
+    "rice",
+    "chicken",
+    "onion",
+    "garlic",
+    "ginger"
+   ]
+  },
+  {
+   "text": "Melt the butter in a pot. Cook the onion until soft, then add the garlic, ginger, garam masala, turmeric and chili powder.",
+   "ingredients": [
+    "butter",
+    "onion",
+    "garlic",
+    "ginger",
+    "garam_masala",
+    "turmeric",
+    "chili_powder"
+   ]
+  },
+  {
+   "text": "Add the canned tomato and salt and simmer for 10 minutes. Add the chicken and cook until cooked through.",
+   "ingredients": [
+    "canned_tomato",
+    "salt",
+    "chicken"
+   ]
+  },
+  {
+   "text": "Stir in the cream and warm through. Serve over the rice.",
+   "ingredients": [
+    "cream",
+    "rice"
+   ]
+  }
+ ],
+ "21": [
+  {
+   "text": "Cook the rice. Rinse the red lentils and chop the onion, tomato, garlic and ginger.",
+   "ingredients": [
+    "rice",
+    "red_lentils",
+    "onion",
+    "tomato",
+    "garlic",
+    "ginger"
+   ]
+  },
+  {
+   "text": "Heat oil and cook the onion until soft. Add the garlic, ginger, turmeric, garam masala and chili powder for 1 minute.",
+   "ingredients": [
+    "vegetable_oil",
+    "onion",
+    "garlic",
+    "ginger",
+    "turmeric",
+    "garam_masala",
+    "chili_powder"
+   ]
+  },
+  {
+   "text": "Add the tomato, red lentils and 3 cups of water. Simmer 20 minutes, stirring now and then, until the lentils are soft.",
+   "ingredients": [
+    "tomato",
+    "red_lentils"
+   ]
+  },
+  {
+   "text": "Season with salt and serve with the rice.",
+   "ingredients": [
+    "salt",
+    "rice"
+   ]
+  }
+ ],
+ "22": [
+  {
+   "text": "Cook the rice. Cut the chicken into pieces and chop the onion, tomato, garlic and ginger.",
+   "ingredients": [
+    "rice",
+    "chicken",
+    "onion",
+    "tomato",
+    "garlic",
+    "ginger"
+   ]
+  },
+  {
+   "text": "Heat oil and cook the onion until golden. Add the garlic, ginger, curry powder, turmeric and chili powder and stir for 1 minute.",
+   "ingredients": [
+    "vegetable_oil",
+    "onion",
+    "garlic",
+    "ginger",
+    "curry_powder",
+    "turmeric",
+    "chili_powder"
+   ]
+  },
+  {
+   "text": "Add the tomato and cook until it breaks down. Add the chicken and salt.",
+   "ingredients": [
+    "tomato",
+    "chicken",
+    "salt"
+   ]
+  },
+  {
+   "text": "Add a little water, cover and simmer for 20 minutes, until the chicken is cooked through. Serve with the rice.",
+   "ingredients": [
+    "chicken",
+    "rice"
+   ]
+  }
+ ],
+ "23": [
+  {
+   "text": "Cook the rice. Boil the eggs for 10 minutes, then cool and peel them.",
+   "ingredients": [
+    "rice",
+    "egg"
+   ]
+  },
+  {
+   "text": "Heat oil and cook the chopped onion until golden. Add the garlic, ginger, turmeric, garam masala and chili powder.",
+   "ingredients": [
+    "vegetable_oil",
+    "onion",
+    "garlic",
+    "ginger",
+    "turmeric",
+    "garam_masala",
+    "chili_powder"
+   ]
+  },
+  {
+   "text": "Add the chopped tomato, salt and a little water and simmer until thick.",
+   "ingredients": [
+    "tomato",
+    "salt"
+   ]
+  },
+  {
+   "text": "Add the eggs and warm them in the sauce for 5 minutes. Serve with the rice.",
+   "ingredients": [
+    "egg",
+    "rice"
+   ]
+  }
+ ],
+ "24": [
+  {
+   "text": "Boil the spinach for 2 minutes, drain and blend it until smooth. Cut the paneer into cubes.",
+   "ingredients": [
+    "spinach",
+    "paneer"
+   ]
+  },
+  {
+   "text": "Heat oil and cook the chopped onion until soft. Add the garlic, ginger and garam masala.",
+   "ingredients": [
+    "vegetable_oil",
+    "onion",
+    "garlic",
+    "ginger",
+    "garam_masala"
+   ]
+  },
+  {
+   "text": "Add the tomato and salt and cook until soft, then stir in the spinach and simmer 5 minutes.",
+   "ingredients": [
+    "tomato",
+    "salt",
+    "spinach"
+   ]
+  },
+  {
+   "text": "Add the paneer and cream, warm through and serve with the naan.",
+   "ingredients": [
+    "paneer",
+    "cream",
+    "naan"
+   ]
+  }
+ ],
+ "25": [
+  {
+   "text": "Peel the banana and break it into pieces.",
+   "ingredients": [
+    "banana"
+   ]
+  },
+  {
+   "text": "Add the banana, yogurt and milk to a blender.",
+   "ingredients": [
+    "banana",
+    "yogurt",
+    "milk"
+   ]
+  },
+  {
+   "text": "Add the sugar and blend until smooth.",
+   "ingredients": [
+    "sugar"
+   ]
+  },
+  {
+   "text": "Taste, add more sugar if you like, and serve cold.",
+   "ingredients": [
+    "sugar"
+   ]
+  }
+ ],
+ "26": [
+  {
+   "text": "Boil the pasta in water with a generous pinch of salt until tender. Save a cup of the cooking water, then drain.",
+   "ingredients": [
+    "pasta",
+    "salt"
+   ]
+  },
+  {
+   "text": "Slice the garlic. Warm the olive oil over low heat and cook the garlic until just golden.",
+   "ingredients": [
+    "garlic",
+    "olive_oil"
+   ]
+  },
+  {
+   "text": "Add the chili powder, then the pasta and a splash of the cooking water. Toss until glossy.",
+   "ingredients": [
+    "chili_powder",
+    "pasta"
+   ]
+  },
+  {
+   "text": "Season with black pepper, top with parmesan and serve.",
+   "ingredients": [
+    "black_pepper",
+    "parmesan"
+   ]
+  }
+ ],
+ "27": [
+  {
+   "text": "Boil the pasta in water with a generous pinch of salt until tender, then drain.",
+   "ingredients": [
+    "pasta",
+    "salt"
+   ]
+  },
+  {
+   "text": "Heat the olive oil and cook the chopped onion until soft. Add the garlic and chili powder for 30 seconds.",
+   "ingredients": [
+    "olive_oil",
+    "onion",
+    "garlic",
+    "chili_powder"
+   ]
+  },
+  {
+   "text": "Add the canned tomato, a pinch of sugar and a little salt, and simmer for 10 minutes.",
+   "ingredients": [
+    "canned_tomato",
+    "sugar",
+    "salt"
+   ]
+  },
+  {
+   "text": "Toss the pasta in the sauce and top with parmesan.",
+   "ingredients": [
+    "pasta",
+    "parmesan"
+   ]
+  }
+ ],
+ "28": [
+  {
+   "text": "Boil the pasta in water with a generous pinch of salt until tender. Save a cup of the cooking water, then drain.",
+   "ingredients": [
+    "pasta",
+    "salt"
+   ]
+  },
+  {
+   "text": "Cut the bacon into small pieces and cook it in a pan until crisp.",
+   "ingredients": [
+    "bacon"
+   ]
+  },
+  {
+   "text": "Beat the eggs with the parmesan and plenty of black pepper.",
+   "ingredients": [
+    "egg",
+    "parmesan",
+    "black_pepper"
+   ]
+  },
+  {
+   "text": "Take the pan off the heat and toss in the pasta. Stir in the egg mixture with a splash of cooking water, then stir over very low heat until the sauce thickens and the egg is no longer runny.",
+   "ingredients": [
+    "pasta",
+    "egg"
+   ]
+  }
+ ],
+ "29": [
+  {
+   "text": "Boil the pasta in water with a generous pinch of salt until tender, then drain. Cut the chicken into strips.",
+   "ingredients": [
+    "pasta",
+    "salt",
+    "chicken"
+   ]
+  },
+  {
+   "text": "Melt the butter in a pan and cook the chicken until golden and cooked through. Take it out.",
+   "ingredients": [
+    "butter",
+    "chicken"
+   ]
+  },
+  {
+   "text": "In the same pan, cook the minced garlic for 30 seconds. Add the cream and simmer until slightly thick.",
+   "ingredients": [
+    "garlic",
+    "cream"
+   ]
+  },
+  {
+   "text": "Stir in the parmesan, then add the pasta and chicken. Season with salt and black pepper.",
+   "ingredients": [
+    "parmesan",
+    "pasta",
+    "chicken",
+    "salt",
+    "black_pepper"
+   ]
+  }
+ ],
+ "30": [
+  {
+   "text": "Boil the pasta in water with a generous pinch of salt until tender. Save a cup of the cooking water, then drain.",
+   "ingredients": [
+    "pasta",
+    "salt"
+   ]
+  },
+  {
+   "text": "Zest and juice the lemon. Mince the garlic.",
+   "ingredients": [
+    "lemon",
+    "garlic"
+   ]
+  },
+  {
+   "text": "Melt the butter, cook the garlic for 30 seconds, then add the lemon juice.",
+   "ingredients": [
+    "butter",
+    "garlic",
+    "lemon"
+   ]
+  },
+  {
+   "text": "Toss in the pasta with a splash of cooking water, the parmesan, lemon zest and black pepper.",
+   "ingredients": [
+    "pasta",
+    "parmesan",
+    "lemon",
+    "black_pepper"
+   ]
+  }
+ ],
+ "31": [
+  {
+   "text": "Heat the oven to 180°C (350°F). Chop the tomato, onion and spinach.",
+   "ingredients": [
+    "tomato",
+    "onion",
+    "spinach"
+   ]
+  },
+  {
+   "text": "Heat the olive oil in an oven-safe pan and cook the onion until soft. Add the tomato and spinach until the spinach wilts.",
+   "ingredients": [
+    "olive_oil",
+    "onion",
+    "tomato",
+    "spinach"
+   ]
+  },
+  {
+   "text": "Beat the eggs with the salt and black pepper and pour them over the vegetables. Sprinkle with the cheese.",
+   "ingredients": [
+    "egg",
+    "salt",
+    "black_pepper",
+    "cheese"
+   ]
+  },
+  {
+   "text": "Bake for 12 to 15 minutes, until the egg is set and golden on top.",
+   "ingredients": [
+    "egg"
+   ]
+  }
+ ],
+ "32": [
+  {
+   "text": "Cut the chicken into small pieces. Mince the garlic and chop the onion and cilantro.",
+   "ingredients": [
+    "chicken",
+    "garlic",
+    "onion",
+    "cilantro"
+   ]
+  },
+  {
+   "text": "Toss the chicken with the chili powder, garlic and salt.",
+   "ingredients": [
+    "chicken",
+    "chili_powder",
+    "garlic",
+    "salt"
+   ]
+  },
+  {
+   "text": "Heat oil in a pan and cook the chicken until browned and cooked through. Warm the corn tortillas.",
+   "ingredients": [
+    "vegetable_oil",
+    "chicken",
+    "corn_tortilla"
+   ]
+  },
+  {
+   "text": "Fill the corn tortillas with the chicken, onion and cilantro and squeeze lime over the top.",
+   "ingredients": [
+    "corn_tortilla",
+    "chicken",
+    "onion",
+    "cilantro",
+    "lime"
+   ]
+  }
+ ],
+ "33": [
+  {
+   "text": "Chop the tomato, onion, garlic and cilantro.",
+   "ingredients": [
+    "tomato",
+    "onion",
+    "garlic",
+    "cilantro"
+   ]
+  },
+  {
+   "text": "Heat oil and cook the onion and garlic until soft. Add the tomato, chili powder and salt and simmer for 8 minutes.",
+   "ingredients": [
+    "vegetable_oil",
+    "onion",
+    "garlic",
+    "tomato",
+    "chili_powder",
+    "salt"
+   ]
+  },
+  {
+   "text": "Warm the corn tortillas in a dry pan, then fry the eggs in a little oil until the whites are set.",
+   "ingredients": [
+    "corn_tortilla",
+    "egg",
+    "vegetable_oil"
+   ]
+  },
+  {
+   "text": "Put the eggs on the corn tortillas, spoon the sauce over and top with cilantro.",
+   "ingredients": [
+    "egg",
+    "corn_tortilla",
+    "cilantro"
+   ]
+  }
+ ],
+ "34": [
+  {
+   "text": "Thinly slice the bell pepper and onion. Grate the cheese.",
+   "ingredients": [
+    "bell_pepper",
+    "onion",
+    "cheese"
+   ]
+  },
+  {
+   "text": "Heat a little oil in a pan and cook the bell pepper and onion until soft. Take them out.",
+   "ingredients": [
+    "vegetable_oil",
+    "bell_pepper",
+    "onion"
+   ]
+  },
+  {
+   "text": "Lay a flour tortilla in the pan, cover half with the cheese, bell pepper and onion, then fold it over.",
+   "ingredients": [
+    "flour_tortilla",
+    "cheese",
+    "bell_pepper",
+    "onion"
+   ]
+  },
+  {
+   "text": "Cook 2 minutes per side until crisp and the cheese melts. Cut into wedges.",
+   "ingredients": [
+    "cheese"
+   ]
+  }
+ ],
+ "35": [
+  {
+   "text": "Cut the chicken into pieces. Chop the tomato, onion, garlic, bell pepper and carrot.",
+   "ingredients": [
+    "chicken",
+    "tomato",
+    "onion",
+    "garlic",
+    "bell_pepper",
+    "carrot"
+   ]
+  },
+  {
+   "text": "Heat oil in a large pot and brown the chicken with the salt and chili powder. Take it out.",
+   "ingredients": [
+    "vegetable_oil",
+    "chicken",
+    "salt",
+    "chili_powder"
+   ]
+  },
+  {
+   "text": "Cook the onion, garlic, bell pepper and carrot until soft. Add the tomato and the rice and stir for 1 minute.",
+   "ingredients": [
+    "onion",
+    "garlic",
+    "bell_pepper",
+    "carrot",
+    "tomato",
+    "rice"
+   ]
+  },
+  {
+   "text": "Add 2 cups of water and the chicken. Cover and simmer for 20 minutes, until the rice is tender and the chicken is cooked through.",
+   "ingredients": [
+    "chicken",
+    "rice"
+   ]
+  }
+ ],
+ "36": [
+  {
+   "text": "Cook the rice and stir in some lime juice and chopped cilantro.",
+   "ingredients": [
+    "rice",
+    "lime",
+    "cilantro"
+   ]
+  },
+  {
+   "text": "Heat oil and cook the chopped onion until soft. Add the ground beef, chili powder and salt and cook until browned and cooked through.",
+   "ingredients": [
+    "vegetable_oil",
+    "onion",
+    "ground_beef",
+    "chili_powder",
+    "salt"
+   ]
+  },
+  {
+   "text": "Warm the kidney beans in a small pot. Chop the tomato and shred the lettuce.",
+   "ingredients": [
+    "kidney_beans",
+    "tomato",
+    "lettuce"
+   ]
+  },
+  {
+   "text": "Build bowls with the rice, ground beef, kidney beans, tomato and lettuce and top with the cheese.",
+   "ingredients": [
+    "rice",
+    "ground_beef",
+    "kidney_beans",
+    "tomato",
+    "lettuce",
+    "cheese"
+   ]
+  }
+ ],
+ "37": [
+  {
+   "text": "Toss the shrimp with lime juice, minced garlic, chili powder and salt.",
+   "ingredients": [
+    "shrimp",
+    "lime",
+    "garlic",
+    "chili_powder",
+    "salt"
+   ]
+  },
+  {
+   "text": "Shred the cabbage, chop the cilantro and slice the avocado.",
+   "ingredients": [
+    "cabbage",
+    "cilantro",
+    "avocado"
+   ]
+  },
+  {
+   "text": "Heat oil in a pan and cook the shrimp 2 to 3 minutes per side, until pink and opaque.",
+   "ingredients": [
+    "vegetable_oil",
+    "shrimp"
+   ]
+  },
+  {
+   "text": "Warm the corn tortillas and fill them with the shrimp, cabbage, avocado and cilantro. Add a squeeze of lime.",
+   "ingredients": [
+    "corn_tortilla",
+    "shrimp",
+    "cabbage",
+    "avocado",
+    "cilantro",
+    "lime"
+   ]
+  }
+ ],
+ "38": [
+  {
+   "text": "Boil the shrimp until pink and cooked through, then cool and halve them. Cook the rice noodles and rinse in cold water.",
+   "ingredients": [
+    "shrimp",
+    "rice_noodles"
+   ]
+  },
+  {
+   "text": "Cut the carrot into thin strips, tear the lettuce and pick the cilantro leaves.",
+   "ingredients": [
+    "carrot",
+    "lettuce",
+    "cilantro"
+   ]
+  },
+  {
+   "text": "Dip a rice paper in warm water until soft. Layer lettuce, rice noodles, carrot, cilantro and shrimp, then roll it up tightly.",
+   "ingredients": [
+    "rice_paper",
+    "lettuce",
+    "rice_noodles",
+    "carrot",
+    "cilantro",
+    "shrimp"
+   ]
+  },
+  {
+   "text": "For the dipping sauce, mix the fish sauce, lime juice, sugar and minced garlic with a little water.",
+   "ingredients": [
+    "fish_sauce",
+    "lime",
+    "sugar",
+    "garlic"
+   ]
+  }
+ ],
+ "39": [
+  {
+   "text": "Cook the rice. Cut the chicken into pieces and slice the ginger, garlic and onion.",
+   "ingredients": [
+    "rice",
+    "chicken",
+    "ginger",
+    "garlic",
+    "onion"
+   ]
+  },
+  {
+   "text": "Melt the sugar with a little oil in a pan until golden brown.",
+   "ingredients": [
+    "sugar",
+    "vegetable_oil"
+   ]
+  },
+  {
+   "text": "Add the ginger, garlic and onion for 1 minute, then the chicken, fish sauce, chili powder and black pepper.",
+   "ingredients": [
+    "ginger",
+    "garlic",
+    "onion",
+    "chicken",
+    "fish_sauce",
+    "chili_powder",
+    "black_pepper"
+   ]
+  },
+  {
+   "text": "Cover and simmer for 15 to 20 minutes, until the chicken is cooked through and the sauce is sticky. Serve with the rice.",
+   "ingredients": [
+    "chicken",
+    "rice"
+   ]
+  }
+ ],
+ "40": [
+  {
+   "text": "Cook the rice noodles and rinse in cold water. Slice the cucumber and carrot into strips and tear the lettuce.",
+   "ingredients": [
+    "rice_noodles",
+    "cucumber",
+    "carrot",
+    "lettuce"
+   ]
+  },
+  {
+   "text": "Mix the fish sauce, lime juice, sugar, minced garlic and chili powder with a little water for the dressing.",
+   "ingredients": [
+    "fish_sauce",
+    "lime",
+    "sugar",
+    "garlic",
+    "chili_powder"
+   ]
+  },
+  {
+   "text": "Heat oil and cook the ground pork until browned and cooked through.",
+   "ingredients": [
+    "vegetable_oil",
+    "ground_pork"
+   ]
+  },
+  {
+   "text": "Fill bowls with the lettuce, rice noodles, cucumber, carrot and pork. Add cilantro and pour the dressing over.",
+   "ingredients": [
+    "lettuce",
+    "rice_noodles",
+    "cucumber",
+    "carrot",
+    "cilantro"
+   ]
+  }
+ ],
+ "41": [
+  {
+   "text": "Cook the rice. Slice the onion and green onion.",
+   "ingredients": [
+    "rice",
+    "onion",
+    "green_onion"
+   ]
+  },
+  {
+   "text": "Beat the eggs with the fish sauce and black pepper.",
+   "ingredients": [
+    "egg",
+    "fish_sauce",
+    "black_pepper"
+   ]
+  },
+  {
+   "text": "Heat oil and cook the onion until soft. Stir it into the eggs with the green onion.",
+   "ingredients": [
+    "vegetable_oil",
+    "onion",
+    "egg",
+    "green_onion"
+   ]
+  },
+  {
+   "text": "Pour the mixture into the pan and cook until golden on both sides and set in the middle. Serve with the rice.",
+   "ingredients": [
+    "rice"
+   ]
+  }
+ ],
+ "42": [
+  {
+   "text": "Char the halved onion and a piece of ginger in a dry pot for a few minutes.",
+   "ingredients": [
+    "onion",
+    "ginger"
+   ]
+  },
+  {
+   "text": "Add the chicken and 6 cups of water. Simmer 25 minutes until the chicken is cooked through, then shred it and take out the onion and ginger.",
+   "ingredients": [
+    "chicken",
+    "onion",
+    "ginger"
+   ]
+  },
+  {
+   "text": "Season the broth with the fish sauce, sugar and salt. Cook the rice noodles separately.",
+   "ingredients": [
+    "fish_sauce",
+    "sugar",
+    "salt",
+    "rice_noodles"
+   ]
+  },
+  {
+   "text": "Put the rice noodles and chicken in bowls, pour the hot broth over and top with bean sprouts, cilantro, green onion and a squeeze of lime.",
+   "ingredients": [
+    "rice_noodles",
+    "chicken",
+    "bean_sprouts",
+    "cilantro",
+    "green_onion",
+    "lime"
+   ]
+  }
+ ],
+ "43": [
+  {
+   "text": "Cook the rice. Mince the garlic and slice the green onion.",
+   "ingredients": [
+    "rice",
+    "garlic",
+    "green_onion"
+   ]
+  },
+  {
+   "text": "Mix the fish sauce, sugar and chili powder with a splash of water.",
+   "ingredients": [
+    "fish_sauce",
+    "sugar",
+    "chili_powder"
+   ]
+  },
+  {
+   "text": "Heat oil and cook the garlic for 30 seconds. Add the shrimp and cook 2 minutes per side, until pink.",
+   "ingredients": [
+    "vegetable_oil",
+    "garlic",
+    "shrimp"
+   ]
+  },
+  {
+   "text": "Pour in the sauce and cook 1 minute until sticky. Top with the green onion and serve with the rice.",
+   "ingredients": [
+    "green_onion",
+    "rice"
+   ]
+  }
+ ],
+ "44": [
+  {
+   "text": "Mix the flour, sugar, baking powder and salt in a bowl.",
+   "ingredients": [
+    "flour",
+    "sugar",
+    "baking_powder",
+    "salt"
+   ]
+  },
+  {
+   "text": "Whisk the milk and egg together with some melted butter.",
+   "ingredients": [
+    "milk",
+    "egg",
+    "butter"
+   ]
+  },
+  {
+   "text": "Pour the milk mixture into the flour mixture and stir just until combined. A few lumps are fine.",
+   "ingredients": [
+    "milk",
+    "flour"
+   ]
+  },
+  {
+   "text": "Cook scoops of batter in a buttered pan until bubbles form, then flip and cook until golden and cooked through. Serve with maple syrup.",
+   "ingredients": [
+    "maple_syrup"
+   ]
+  }
+ ],
+ "45": [
+  {
+   "text": "Chop the onion and garlic. Melt a little butter in a pot and cook them until soft.",
+   "ingredients": [
+    "onion",
+    "garlic",
+    "butter"
+   ]
+  },
+  {
+   "text": "Add the canned tomato, salt, sugar and black pepper. Simmer for 15 minutes, then blend until smooth.",
+   "ingredients": [
+    "canned_tomato",
+    "salt",
+    "sugar",
+    "black_pepper"
+   ]
+  },
+  {
+   "text": "Butter the outside of the bread and put the cheese between the slices.",
+   "ingredients": [
+    "butter",
+    "bread",
+    "cheese"
+   ]
+  },
+  {
+   "text": "Cook the sandwich in a pan until golden on both sides and the cheese melts. Serve with the soup.",
+   "ingredients": [
+    "cheese"
+   ]
+  }
+ ],
+ "46": [
+  {
+   "text": "Chop the onion, garlic and bell pepper. Drain the kidney beans.",
+   "ingredients": [
+    "onion",
+    "garlic",
+    "bell_pepper",
+    "kidney_beans"
+   ]
+  },
+  {
+   "text": "Heat oil in a pot and cook the onion and bell pepper until soft. Add the garlic.",
+   "ingredients": [
+    "vegetable_oil",
+    "onion",
+    "bell_pepper",
+    "garlic"
+   ]
+  },
+  {
+   "text": "Add the ground beef and cook until browned and cooked through. Stir in the chili powder and salt.",
+   "ingredients": [
+    "ground_beef",
+    "chili_powder",
+    "salt"
+   ]
+  },
+  {
+   "text": "Add the canned tomato and kidney beans and simmer for 25 minutes, stirring now and then.",
+   "ingredients": [
+    "canned_tomato",
+    "kidney_beans"
+   ]
+  }
+ ],
+ "47": [
+  {
+   "text": "Mix the ground beef with salt and black pepper and shape it into patties. Slice the tomato and onion and wash the lettuce.",
+   "ingredients": [
+    "ground_beef",
+    "salt",
+    "black_pepper",
+    "tomato",
+    "onion",
+    "lettuce"
+   ]
+  },
+  {
+   "text": "Heat oil in a pan and cook the patties 4 to 5 minutes per side, until cooked through with no pink in the middle.",
+   "ingredients": [
+    "vegetable_oil"
+   ]
+  },
+  {
+   "text": "Add the cheese on top during the last minute so it melts.",
+   "ingredients": [
+    "cheese"
+   ]
+  },
+  {
+   "text": "Toast the burger buns and build the burgers with ketchup, lettuce, tomato and onion.",
+   "ingredients": [
+    "burger_bun",
+    "ketchup",
+    "lettuce",
+    "tomato",
+    "onion"
+   ]
+  }
+ ],
+ "48": [
+  {
+   "text": "Heat the oven to 200°C (400°F). Cut the potatoes, carrots and onion into chunks and mince the garlic.",
+   "ingredients": [
+    "potato",
+    "carrot",
+    "onion",
+    "garlic"
+   ]
+  },
+  {
+   "text": "Toss the vegetables with olive oil, garlic, salt and black pepper and spread them on a sheet pan.",
+   "ingredients": [
+    "olive_oil",
+    "garlic",
+    "salt",
+    "black_pepper"
+   ]
+  },
+  {
+   "text": "Season the chicken with salt and black pepper and lay it on top of the vegetables.",
+   "ingredients": [
+    "chicken",
+    "salt",
+    "black_pepper"
+   ]
+  },
+  {
+   "text": "Roast for 35 to 40 minutes, until the vegetables are tender and the chicken is cooked through.",
+   "ingredients": [
+    "chicken"
+   ]
+  }
+ ]
+}
