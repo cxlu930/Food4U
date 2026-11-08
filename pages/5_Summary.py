@@ -40,7 +40,15 @@ h3 { font-size:clamp(22px, 3vw, 28px) !important; letter-spacing:-0.5px; }
 .f4u-bar > div { height:100%; border-radius:999px; }
 .f4u-bar-label { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
   font:14px Arial, Helvetica, sans-serif; color:#52623a; }
-[data-testid="stButtonGroup"] button { border-radius:999px !important; min-height:44px; }
+.st-key-summary_period [data-testid="stButtonGroup"] > div:last-child { gap:12px; }
+.st-key-summary_period [data-testid="stButtonGroup"] button {
+ border-radius:999px !important; height:44px; padding:0 24px; margin:0 !important;
+ background:#FAF8F1; border:1px solid #dcded4; color:#17240e;
+}
+.st-key-summary_period [data-testid="stButtonGroup"] button[data-testid="stBaseButton-segmented_controlActive"],
+.st-key-summary_period [data-testid="stButtonGroup"] button[data-testid="stBaseButton-segmented_controlActive"]:hover {
+ background:#D8E99B; border-color:#879d4e; color:#17240e;
+}
 @media (max-width:760px) {
   [data-testid="stMainBlockContainer"] { padding:18px 16px 40px; }
   [class*="st-key-summary_card_"] { padding:16px !important; }
