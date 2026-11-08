@@ -10,7 +10,7 @@ import streamlit as st
 from PIL import Image, UnidentifiedImageError
 
 from data.ingredients import INGREDIENTS, SPICE_LEVELS
-from db import current_user, get_preferences, get_budget_summary, get_spending_summary, init_db, save_preferences, sign_out
+from db import current_user, get_preferences, get_pantry_items, get_budget_summary, get_spending_summary, init_db, save_preferences, sign_out
 from services.recommender import MODE_COOK, get_recommendations, load_recipes, recommend
 
 st.set_page_config(page_title="Food4U", page_icon="🌿", layout="wide")
@@ -458,7 +458,30 @@ with st.container(key="home_recommendation_row"):
             mode = "plan_my_meals" if mode_label == "Plan my meals" else "cook_with_what_i_have"
             recommendations = None
             if mode == MODE_COOK:
-                recommendations = home_fridge_recommendations()
+                # Read saved stock on every rerun; scan caching must never cache Pantry results.
+                pantry = get_pantry_items()
+                pantry_revision = (current_user(), json.dumps(pantry, sort_keys=True))
+                if st.session_state.get("home_cook_pantry_revision") != pantry_revision:
+                    st.session_state["home_cook_pantry_revision"] = pantry_revision
+                    st.session_state["home_cook_source"] = "Saved pantry"
+                try:
+                    recommendations = get_recommendations(MODE_COOK)
+                except (OSError, ValueError, KeyError):
+                    st.info("Recipe ideas are temporarily unavailable. Please try again later.")
+
+                scanned_recommendations = home_fridge_recommendations()
+                source = "Saved pantry"
+                if scanned_recommendations is not None:
+                    source = st.radio(
+                        "Use ingredients from", ["Saved pantry", "Fridge photo"],
+                        horizontal=True, key="home_cook_source",
+                    )
+                    if source == "Fridge photo":
+                        recommendations = scanned_recommendations
+                has_usable_pantry = any(
+                    item.get("quantity", 0) > 0 and item.get("status") != "check_item"
+                    for item in pantry
+                )
             else:
                 try:
                     with st.spinner("Finding ideas for your kitchen…"):
@@ -508,8 +531,14 @@ with st.container(key="home_recommendation_row"):
                     """)
             elif recommendations is not None:
                 st.caption(
-                    "No recipes match this photo yet. Try another photo with more visible ingredients."
-                    if mode == "cook_with_what_i_have"
+                    (
+                        "No recipes match this photo yet. Try another photo with more visible ingredients."
+                        if source == "Fridge photo"
+                        else "No recipes match your saved pantry yet. Add groceries or try a fridge photo."
+                        if has_usable_pantry
+                        else "Add groceries to your pantry or upload a fridge photo to get started."
+                    )
+                    if mode == MODE_COOK
                     else "No recipe suggestions yet. Review your dietary preferences to find your next meal."
                 )
 
