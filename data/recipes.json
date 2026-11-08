@@ -18,5 +18,465 @@
     "time_minutes": 25,
     "estimated_price": 3.5,
     "ingredients": ["pasta", "cheese", "milk", "butter", "flour", "salt", "black_pepper"]
+  },
+  {
+    "id": 3,
+    "name": "Egg Fried Rice",
+    "cuisine": "chinese",
+    "spice_level": 0,
+    "flavor": "savory",
+    "time_minutes": 15,
+    "estimated_price": 2.0,
+    "ingredients": ["rice", "egg", "carrot", "onion", "green_onion", "soy_sauce", "vegetable_oil", "salt"]
+  },
+  {
+    "id": 4,
+    "name": "Mapo Tofu",
+    "cuisine": "chinese",
+    "spice_level": 3,
+    "flavor": "savory",
+    "time_minutes": 20,
+    "estimated_price": 3.5,
+    "ingredients": ["tofu", "ground_pork", "doubanjiang", "chili_powder", "garlic", "ginger", "green_onion", "soy_sauce", "vegetable_oil", "rice"]
+  },
+  {
+    "id": 5,
+    "name": "Soy Braised Pork Ribs",
+    "cuisine": "chinese",
+    "spice_level": 0,
+    "flavor": "sweet",
+    "time_minutes": 50,
+    "estimated_price": 5.5,
+    "ingredients": ["pork_ribs", "soy_sauce", "sugar", "ginger", "green_onion", "vegetable_oil", "rice"]
+  },
+  {
+    "id": 6,
+    "name": "Big Plate Chicken with Potatoes",
+    "cuisine": "chinese",
+    "spice_level": 2,
+    "flavor": "savory",
+    "time_minutes": 40,
+    "estimated_price": 4.5,
+    "ingredients": ["chicken", "potato", "bell_pepper", "onion", "garlic", "ginger", "doubanjiang", "chili_powder", "soy_sauce", "sugar", "vegetable_oil", "rice"]
+  },
+  {
+    "id": 7,
+    "name": "Garlic Bok Choy and Mushrooms",
+    "cuisine": "chinese",
+    "spice_level": 0,
+    "flavor": "mild",
+    "time_minutes": 10,
+    "estimated_price": 2.5,
+    "ingredients": ["bok_choy", "mushroom", "garlic", "soy_sauce", "vegetable_oil", "salt", "rice"]
+  },
+  {
+    "id": 8,
+    "name": "Oyakodon (Chicken and Egg Rice Bowl)",
+    "cuisine": "japanese",
+    "spice_level": 0,
+    "flavor": "savory",
+    "time_minutes": 20,
+    "estimated_price": 3.5,
+    "ingredients": ["chicken", "egg", "onion", "dashi", "soy_sauce", "sugar", "green_onion", "rice"]
+  },
+  {
+    "id": 9,
+    "name": "Japanese Chicken Curry Rice",
+    "cuisine": "japanese",
+    "spice_level": 1,
+    "flavor": "mild",
+    "time_minutes": 40,
+    "estimated_price": 3.5,
+    "ingredients": ["curry_roux", "chicken", "potato", "carrot", "onion", "vegetable_oil", "rice"]
+  },
+  {
+    "id": 10,
+    "name": "Tofu Miso Soup with Rice",
+    "cuisine": "japanese",
+    "spice_level": 0,
+    "flavor": "mild",
+    "time_minutes": 10,
+    "estimated_price": 2.0,
+    "ingredients": ["miso", "dashi", "tofu", "green_onion", "rice"]
+  },
+  {
+    "id": 11,
+    "name": "Teriyaki Salmon",
+    "cuisine": "japanese",
+    "spice_level": 0,
+    "flavor": "sweet",
+    "time_minutes": 20,
+    "estimated_price": 7.5,
+    "ingredients": ["salmon", "soy_sauce", "sugar", "ginger", "broccoli", "vegetable_oil", "rice"]
+  },
+  {
+    "id": 12,
+    "name": "Tamagoyaki (Sweet Rolled Omelette)",
+    "cuisine": "japanese",
+    "spice_level": 0,
+    "flavor": "sweet",
+    "time_minutes": 15,
+    "estimated_price": 1.5,
+    "ingredients": ["egg", "sugar", "soy_sauce", "dashi", "vegetable_oil", "salt"]
+  },
+  {
+    "id": 13,
+    "name": "Gyudon (Beef Rice Bowl)",
+    "cuisine": "japanese",
+    "spice_level": 1,
+    "flavor": "savory",
+    "time_minutes": 20,
+    "estimated_price": 5.5,
+    "ingredients": ["beef", "onion", "ginger", "dashi", "soy_sauce", "sugar", "chili_powder", "rice"]
+  },
+  {
+    "id": 14,
+    "name": "Kimchi Fried Rice",
+    "cuisine": "korean",
+    "spice_level": 2,
+    "flavor": "savory",
+    "time_minutes": 15,
+    "estimated_price": 3.0,
+    "ingredients": ["kimchi", "rice", "egg", "onion", "gochujang", "soy_sauce", "sesame_oil", "green_onion", "vegetable_oil"]
+  },
+  {
+    "id": 15,
+    "name": "Bibimbap",
+    "cuisine": "korean",
+    "spice_level": 2,
+    "flavor": "savory",
+    "time_minutes": 35,
+    "estimated_price": 5.0,
+    "ingredients": ["rice", "ground_beef", "egg", "carrot", "spinach", "bean_sprouts", "garlic", "gochujang", "soy_sauce", "sesame_oil", "sesame_seeds", "vegetable_oil", "salt"]
+  },
+  {
+    "id": 16,
+    "name": "Dakgalbi (Spicy Chicken Stir-fry)",
+    "cuisine": "korean",
+    "spice_level": 3,
+    "flavor": "savory",
+    "time_minutes": 30,
+    "estimated_price": 4.5,
+    "ingredients": ["chicken", "cabbage", "onion", "carrot", "garlic", "gochujang", "chili_powder", "soy_sauce", "sugar", "sesame_oil", "vegetable_oil", "rice"]
+  },
+  {
+    "id": 17,
+    "name": "Beef Bulgogi",
+    "cuisine": "korean",
+    "spice_level": 0,
+    "flavor": "sweet",
+    "time_minutes": 25,
+    "estimated_price": 6.0,
+    "ingredients": ["beef", "onion", "carrot", "garlic", "soy_sauce", "sugar", "sesame_oil", "sesame_seeds", "green_onion", "vegetable_oil", "rice"]
+  },
+  {
+    "id": 18,
+    "name": "Gyeran-jjim (Steamed Egg) with Rice",
+    "cuisine": "korean",
+    "spice_level": 0,
+    "flavor": "mild",
+    "time_minutes": 15,
+    "estimated_price": 1.5,
+    "ingredients": ["egg", "green_onion", "salt", "sesame_oil", "rice"]
+  },
+  {
+    "id": 19,
+    "name": "Kimchi Jjigae (Kimchi Stew)",
+    "cuisine": "korean",
+    "spice_level": 3,
+    "flavor": "sour",
+    "time_minutes": 30,
+    "estimated_price": 4.0,
+    "ingredients": ["kimchi", "tofu", "ground_pork", "onion", "garlic", "gochujang", "chili_powder", "green_onion", "vegetable_oil", "rice"]
+  },
+  {
+    "id": 20,
+    "name": "Butter Chicken",
+    "cuisine": "indian",
+    "spice_level": 1,
+    "flavor": "mild",
+    "time_minutes": 40,
+    "estimated_price": 5.0,
+    "ingredients": ["chicken", "butter", "cream", "canned_tomato", "onion", "garlic", "ginger", "garam_masala", "turmeric", "chili_powder", "salt", "rice"]
+  },
+  {
+    "id": 21,
+    "name": "Red Lentil Dal",
+    "cuisine": "indian",
+    "spice_level": 1,
+    "flavor": "savory",
+    "time_minutes": 30,
+    "estimated_price": 2.0,
+    "ingredients": ["red_lentils", "onion", "tomato", "garlic", "ginger", "turmeric", "garam_masala", "chili_powder", "vegetable_oil", "salt", "rice"]
+  },
+  {
+    "id": 22,
+    "name": "Spicy Chicken Curry",
+    "cuisine": "indian",
+    "spice_level": 3,
+    "flavor": "savory",
+    "time_minutes": 40,
+    "estimated_price": 4.0,
+    "ingredients": ["chicken", "onion", "tomato", "garlic", "ginger", "curry_powder", "turmeric", "chili_powder", "vegetable_oil", "salt", "rice"]
+  },
+  {
+    "id": 23,
+    "name": "Egg Curry",
+    "cuisine": "indian",
+    "spice_level": 2,
+    "flavor": "savory",
+    "time_minutes": 30,
+    "estimated_price": 2.5,
+    "ingredients": ["egg", "onion", "tomato", "garlic", "ginger", "turmeric", "garam_masala", "chili_powder", "vegetable_oil", "salt", "rice"]
+  },
+  {
+    "id": 24,
+    "name": "Palak Paneer",
+    "cuisine": "indian",
+    "spice_level": 1,
+    "flavor": "mild",
+    "time_minutes": 35,
+    "estimated_price": 5.0,
+    "ingredients": ["spinach", "paneer", "onion", "tomato", "garlic", "ginger", "garam_masala", "cream", "vegetable_oil", "salt", "naan"]
+  },
+  {
+    "id": 25,
+    "name": "Banana Lassi",
+    "cuisine": "indian",
+    "spice_level": 0,
+    "flavor": "sweet",
+    "time_minutes": 5,
+    "estimated_price": 1.5,
+    "ingredients": ["banana", "yogurt", "milk", "sugar"]
+  },
+  {
+    "id": 26,
+    "name": "Spaghetti Aglio e Olio",
+    "cuisine": "italian",
+    "spice_level": 1,
+    "flavor": "savory",
+    "time_minutes": 15,
+    "estimated_price": 2.0,
+    "ingredients": ["pasta", "garlic", "olive_oil", "chili_powder", "parmesan", "salt", "black_pepper"]
+  },
+  {
+    "id": 27,
+    "name": "Penne Arrabbiata",
+    "cuisine": "italian",
+    "spice_level": 2,
+    "flavor": "savory",
+    "time_minutes": 25,
+    "estimated_price": 2.5,
+    "ingredients": ["pasta", "canned_tomato", "onion", "garlic", "chili_powder", "olive_oil", "parmesan", "salt", "sugar"]
+  },
+  {
+    "id": 28,
+    "name": "Spaghetti Carbonara",
+    "cuisine": "italian",
+    "spice_level": 0,
+    "flavor": "savory",
+    "time_minutes": 20,
+    "estimated_price": 3.5,
+    "ingredients": ["pasta", "egg", "bacon", "parmesan", "black_pepper", "salt"]
+  },
+  {
+    "id": 29,
+    "name": "Chicken Alfredo Pasta",
+    "cuisine": "italian",
+    "spice_level": 0,
+    "flavor": "mild",
+    "time_minutes": 25,
+    "estimated_price": 4.5,
+    "ingredients": ["pasta", "chicken", "cream", "butter", "parmesan", "garlic", "salt", "black_pepper"]
+  },
+  {
+    "id": 30,
+    "name": "Lemon Butter Pasta",
+    "cuisine": "italian",
+    "spice_level": 0,
+    "flavor": "sour",
+    "time_minutes": 15,
+    "estimated_price": 2.5,
+    "ingredients": ["pasta", "lemon", "butter", "parmesan", "garlic", "salt", "black_pepper"]
+  },
+  {
+    "id": 31,
+    "name": "Vegetable Frittata",
+    "cuisine": "italian",
+    "spice_level": 0,
+    "flavor": "savory",
+    "time_minutes": 25,
+    "estimated_price": 3.0,
+    "ingredients": ["egg", "tomato", "onion", "spinach", "cheese", "olive_oil", "salt", "black_pepper"]
+  },
+  {
+    "id": 32,
+    "name": "Spicy Chicken Tacos",
+    "cuisine": "mexican",
+    "spice_level": 3,
+    "flavor": "savory",
+    "time_minutes": 25,
+    "estimated_price": 4.0,
+    "ingredients": ["corn_tortilla", "chicken", "onion", "garlic", "cilantro", "lime", "chili_powder", "vegetable_oil", "salt"]
+  },
+  {
+    "id": 33,
+    "name": "Huevos Rancheros",
+    "cuisine": "mexican",
+    "spice_level": 1,
+    "flavor": "savory",
+    "time_minutes": 20,
+    "estimated_price": 2.5,
+    "ingredients": ["egg", "corn_tortilla", "tomato", "onion", "garlic", "chili_powder", "cilantro", "vegetable_oil", "salt"]
+  },
+  {
+    "id": 34,
+    "name": "Cheese and Pepper Quesadilla",
+    "cuisine": "mexican",
+    "spice_level": 0,
+    "flavor": "mild",
+    "time_minutes": 10,
+    "estimated_price": 2.5,
+    "ingredients": ["flour_tortilla", "cheese", "bell_pepper", "onion", "vegetable_oil"]
+  },
+  {
+    "id": 35,
+    "name": "Arroz con Pollo (Chicken and Rice)",
+    "cuisine": "mexican",
+    "spice_level": 1,
+    "flavor": "savory",
+    "time_minutes": 40,
+    "estimated_price": 3.5,
+    "ingredients": ["rice", "chicken", "tomato", "onion", "garlic", "bell_pepper", "carrot", "chili_powder", "vegetable_oil", "salt"]
+  },
+  {
+    "id": 36,
+    "name": "Beef Burrito Bowl",
+    "cuisine": "mexican",
+    "spice_level": 2,
+    "flavor": "savory",
+    "time_minutes": 30,
+    "estimated_price": 5.0,
+    "ingredients": ["rice", "ground_beef", "kidney_beans", "tomato", "onion", "lettuce", "cheese", "lime", "cilantro", "chili_powder", "vegetable_oil", "salt"]
+  },
+  {
+    "id": 37,
+    "name": "Lime Shrimp Tacos",
+    "cuisine": "mexican",
+    "spice_level": 1,
+    "flavor": "sour",
+    "time_minutes": 20,
+    "estimated_price": 6.0,
+    "ingredients": ["corn_tortilla", "shrimp", "lime", "cabbage", "avocado", "garlic", "cilantro", "chili_powder", "vegetable_oil", "salt"]
+  },
+  {
+    "id": 38,
+    "name": "Shrimp Fresh Spring Rolls",
+    "cuisine": "vietnamese",
+    "spice_level": 0,
+    "flavor": "sour",
+    "time_minutes": 30,
+    "estimated_price": 4.5,
+    "ingredients": ["rice_paper", "shrimp", "rice_noodles", "lettuce", "carrot", "cilantro", "fish_sauce", "lime", "sugar", "garlic"]
+  },
+  {
+    "id": 39,
+    "name": "Caramelized Ginger Chicken",
+    "cuisine": "vietnamese",
+    "spice_level": 1,
+    "flavor": "sweet",
+    "time_minutes": 35,
+    "estimated_price": 4.0,
+    "ingredients": ["chicken", "ginger", "garlic", "onion", "fish_sauce", "sugar", "chili_powder", "black_pepper", "vegetable_oil", "rice"]
+  },
+  {
+    "id": 40,
+    "name": "Pork Rice Noodle Bowl (Bun)",
+    "cuisine": "vietnamese",
+    "spice_level": 1,
+    "flavor": "sour",
+    "time_minutes": 30,
+    "estimated_price": 4.5,
+    "ingredients": ["ground_pork", "rice_noodles", "lettuce", "cucumber", "carrot", "cilantro", "fish_sauce", "lime", "sugar", "garlic", "chili_powder", "vegetable_oil"]
+  },
+  {
+    "id": 41,
+    "name": "Vietnamese Onion Omelette with Rice",
+    "cuisine": "vietnamese",
+    "spice_level": 0,
+    "flavor": "savory",
+    "time_minutes": 10,
+    "estimated_price": 1.5,
+    "ingredients": ["egg", "onion", "green_onion", "fish_sauce", "black_pepper", "vegetable_oil", "rice"]
+  },
+  {
+    "id": 42,
+    "name": "Quick Chicken Pho",
+    "cuisine": "vietnamese",
+    "spice_level": 0,
+    "flavor": "savory",
+    "time_minutes": 45,
+    "estimated_price": 4.5,
+    "ingredients": ["chicken", "rice_noodles", "onion", "ginger", "fish_sauce", "sugar", "salt", "bean_sprouts", "cilantro", "green_onion", "lime"]
+  },
+  {
+    "id": 43,
+    "name": "Chili Garlic Shrimp with Rice",
+    "cuisine": "vietnamese",
+    "spice_level": 2,
+    "flavor": "savory",
+    "time_minutes": 20,
+    "estimated_price": 6.0,
+    "ingredients": ["shrimp", "garlic", "fish_sauce", "sugar", "chili_powder", "green_onion", "vegetable_oil", "rice"]
+  },
+  {
+    "id": 44,
+    "name": "Fluffy Pancakes",
+    "cuisine": "western",
+    "spice_level": 0,
+    "flavor": "sweet",
+    "time_minutes": 20,
+    "estimated_price": 1.5,
+    "ingredients": ["flour", "milk", "egg", "sugar", "baking_powder", "butter", "salt", "maple_syrup"]
+  },
+  {
+    "id": 45,
+    "name": "Grilled Cheese and Tomato Soup",
+    "cuisine": "western",
+    "spice_level": 0,
+    "flavor": "savory",
+    "time_minutes": 25,
+    "estimated_price": 3.0,
+    "ingredients": ["bread", "cheese", "butter", "canned_tomato", "onion", "garlic", "salt", "sugar", "black_pepper"]
+  },
+  {
+    "id": 46,
+    "name": "Beef and Bean Chili",
+    "cuisine": "western",
+    "spice_level": 2,
+    "flavor": "savory",
+    "time_minutes": 45,
+    "estimated_price": 4.0,
+    "ingredients": ["ground_beef", "kidney_beans", "canned_tomato", "onion", "garlic", "bell_pepper", "chili_powder", "vegetable_oil", "salt"]
+  },
+  {
+    "id": 47,
+    "name": "Classic Cheeseburger",
+    "cuisine": "western",
+    "spice_level": 0,
+    "flavor": "savory",
+    "time_minutes": 20,
+    "estimated_price": 4.5,
+    "ingredients": ["ground_beef", "burger_bun", "cheese", "lettuce", "tomato", "onion", "ketchup", "vegetable_oil", "salt", "black_pepper"]
+  },
+  {
+    "id": 48,
+    "name": "Sheet Pan Chicken with Potatoes and Carrots",
+    "cuisine": "western",
+    "spice_level": 0,
+    "flavor": "savory",
+    "time_minutes": 50,
+    "estimated_price": 4.0,
+    "ingredients": ["chicken", "potato", "carrot", "onion", "garlic", "olive_oil", "salt", "black_pepper"]
   }
 ]

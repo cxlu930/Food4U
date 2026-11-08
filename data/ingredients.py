@@ -104,9 +104,12 @@ INGREDIENTS = {
     "bean_sprouts": _item("Bean Sprouts", "vegetable", 3, aliases=["mung bean sprouts", "sprouts"]),
     "cilantro": _item("Cilantro", "vegetable", 5, aliases=["coriander", "fresh coriander"]),
     "spinach": _item("Spinach", "vegetable", 5, aliases=["baby spinach", "spinach bunch"]),
-    "mushroom": _item("Mushroom", "vegetable", 7, aliases=["mushrooms", "white mushrooms", "button mushrooms", "cremini", "shiitake"]),
+    "mushroom": _item("Mushroom", "vegetable", 7, aliases=["mushrooms", "white mushrooms", "button mushrooms", "cremini", "shiitake",
+                                                                        "king oyster mushroom", "king oyster", "oyster mushroom", "oyster mushrooms"]),
     "cucumber": _item("Cucumber", "vegetable", 7, aliases=["cucumbers", "english cucumber", "mini cucumbers"]),
     "napa_cabbage": _item("Napa Cabbage", "vegetable", 14, aliases=["chinese cabbage", "suey choy", "wombok"]),
+    "bok_choy": _item("Bok Choy", "vegetable", 3, aliases=["baby bok choy", "pak choi", "shanghai bok choy"]),
+    "cabbage": _item("Cabbage", "vegetable", 10, aliases=["green cabbage", "red cabbage", "white cabbage"]),
 
     # ---------- Fruit ----------
     "lemon": _item("Lemon", "fruit", 21, aliases=["lemons"]),
@@ -118,11 +121,15 @@ INGREDIENTS = {
     # Meat and seafood are assumed to be stored frozen; 14 days is a reminder window
     # for quality, not a safety limit.
     "chicken": _item("Chicken", "meat", 14, ["meat"],
-                     aliases=["chicken breast", "chicken thigh", "chicken thighs", "boneless chicken", "chicken drumsticks"]),
+                     aliases=["chicken breast", "chicken thigh", "chicken thighs", "boneless chicken", "chicken drumsticks", "drumsticks"]),
     "ground_beef": _item("Ground Beef", "meat", 14, ["meat", "beef"],
                          aliases=["lean ground beef", "extra lean ground beef", "minced beef", "beef mince"]),
     "ground_pork": _item("Ground Pork", "meat", 14, ["meat", "pork"], aliases=["minced pork", "pork mince"]),
     "bacon": _item("Bacon", "meat", 14, ["meat", "pork"], aliases=["sliced bacon", "side bacon", "bacon strips"]),
+    "beef": _item("Beef", "meat", 14, ["meat", "beef"],
+                  aliases=["rouladen", "beef rouladen", "beef steak", "stewing beef", "stew beef", "roast beef", "beef cubes"]),
+    "pork_ribs": _item("Pork Ribs", "meat", 14, ["meat", "pork"],
+                       aliases=["bbq pork ribs", "back ribs", "spare ribs", "side ribs", "baby back ribs"]),
 
     # ---------- Seafood ----------
     "salmon": _item("Salmon", "seafood", 14, ["fish"],
@@ -193,13 +200,15 @@ INGREDIENTS = {
 
     # ---------- Spices & baking ----------
     "salt": _item("Salt", "spice", 1095, aliases=["table salt", "sea salt", "kosher salt"]),
-    "sugar": _item("Sugar", "spice", 730, aliases=["white sugar", "granulated sugar", "brown sugar"]),
+    "sugar": _item("Sugar", "spice", 730, aliases=["white sugar", "granulated sugar", "brown sugar",
+                                                        "dark brown sugar", "icing sugar", "powdered sugar", "confectioners sugar"]),
     "black_pepper": _item("Black Pepper", "spice", 365, aliases=["pepper", "ground black pepper"]),
     "curry_powder": _item("Curry Powder", "spice", 365, aliases=["madras curry powder"]),
     "garam_masala": _item("Garam Masala", "spice", 365, aliases=["garam masala powder"]),
     "turmeric": _item("Turmeric", "spice", 365, aliases=["ground turmeric", "turmeric powder"]),
     "chili_powder": _item("Chili Powder", "spice", 365, aliases=["chilli powder", "chili flakes", "red pepper flakes"]),
     "baking_powder": _item("Baking Powder", "spice", 180, aliases=[]),
+    "baking_soda": _item("Baking Soda", "spice", 730, aliases=["bicarbonate of soda", "sodium bicarbonate"]),
 
     # ---------- Oils ----------
     "vegetable_oil": _item("Vegetable Oil", "oil", 365, aliases=["canola oil", "cooking oil", "sunflower oil"]),
@@ -208,4 +217,15 @@ INGREDIENTS = {
     # ---------- Nuts ----------
     "peanut": _item("Peanut", "nut", 180, ["peanut"], aliases=["peanuts", "roasted peanuts", "peanut butter"]),
     "cashew": _item("Cashew", "nut", 180, ["tree_nut"], aliases=["cashews", "cashew nuts"]),
+
+    # ---------- Sweets ----------
+    # Most chocolate contains milk and soy lecithin.
+    "dark_chocolate": _item("Dark Chocolate", "sweets", 365, ["dairy", "soy"],
+                            aliases=["chocolate", "chocolate bar", "chocolate block", "baking chocolate"]),
+    "chocolate_chips": _item("Chocolate Chips", "sweets", 365, ["dairy", "soy"],
+                             aliases=["semi sweet chocolate chips", "semi-sweet chips", "choc chips"]),
+    "chocolate_truffles": _item("Chocolate Truffles", "sweets", 60, ["dairy", "soy", "tree_nut"],
+                                aliases=["truffles", "chocolate truffle"]),
+    # Marshmallows contain animal gelatin; in North America it is usually pork-derived.
+    "marshmallow": _item("Marshmallow", "sweets", 365, ["meat", "pork"], aliases=["marshmallows", "mini marshmallows"]),
 }
