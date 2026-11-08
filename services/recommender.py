@@ -3,7 +3,9 @@
 # Flow:
 #   1. Hard filter: drop any recipe whose ingredients carry a tag in the user's avoid_tags.
 #      This is a safety rule, never replaced by a score penalty.
-#      In "Cook With What I Have", also drop any recipe that uses an expired pantry item.
+#      In "Cook With What I Have", also drop any recipe that uses an expired pantry item,
+#      and any recipe missing an ingredient (PANTRY_STAPLES excepted; expired = missing),
+#      so Cook mode only shows what can be cooked right now.
 #   2. Score the remaining recipes. Both modes use the same function, only the weights differ.
 #   3. Return recipe, score, reasons, warnings and missing ingredients, highest score first,
 #      plus flags telling the page whether default budget / spice values were used.
@@ -47,9 +49,19 @@ DEFAULT_WEEKLY_BUDGET = 100
 # Used when the user has not set the highest spice level they accept: 0 = not spicy.
 DEFAULT_SPICE_TOLERANCE = 0
 
-# Basic seasonings assumed to be at home: not counted in coverage, never listed as missing.
-# (Their tags still count in the hard filter.)
-PANTRY_STAPLES = {"salt", "sugar", "vegetable_oil", "black_pepper"}
+# Basic seasonings and sauces: these are assumed to be always at home; their tags still
+# count in the allergen filter. They are not counted in pantry coverage and never listed
+# as missing. Fresh items (e.g. green_onion, ginger) do not belong here.
+PANTRY_STAPLES = {
+    # basics
+    "salt", "sugar", "vegetable_oil", "black_pepper",
+    # sauces and oils
+    "soy_sauce", "sesame_oil", "olive_oil", "fish_sauce", "ketchup", "mayonnaise",
+    # dried spices
+    "chili_powder", "curry_powder", "turmeric", "garam_masala",
+    # baking
+    "baking_powder", "baking_soda",
+}
 
 
 def normalize_cuisine(value):
@@ -210,6 +222,7 @@ def recommend(recipes, prefs, pantry_items, spent=0.0, mode=MODE_PLAN):
     Returns:
         {
             "results": [...],               # highest score first; [] if all filtered out
+                                            # (Cook mode: only recipes with nothing missing)
             "weekly_budget": 100,
             "remaining_budget": 76.6,
             "max_spice": 0,
@@ -230,7 +243,10 @@ def recommend(recipes, prefs, pantry_items, spent=0.0, mode=MODE_PLAN):
             continue  # safety rule: never shown
         if mode == MODE_COOK and expired & set(recipe["ingredients"]):
             continue  # cooking now with an expired item is not recommended
-        results.append(score_recipe(recipe, prefs, pantry_items, remaining, max_spice, mode))
+        result = score_recipe(recipe, prefs, pantry_items, remaining, max_spice, mode)
+        if mode == MODE_COOK and result["missing_ingredients"]:
+            continue  # Cook mode: only recipes that need nothing new
+        results.append(result)
     results.sort(key=lambda r: (-r["score"], r["recipe"].get("id", 0)))
 
     return {
