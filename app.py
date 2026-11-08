@@ -185,16 +185,20 @@ st.markdown("""
 .st-key-home_budget_period_card [data-testid="stButton"] { height:100%; }
 .st-key-home_budget_period_card button {
  position:relative; display:flex; flex-direction:column; align-items:flex-start; justify-content:center;
- width:100%; height:100%; min-height:146px; padding:18px 30px;
+ width:100%; height:100%; min-height:146px; padding:18px 32px; text-align:left;
  border:1px solid #b8cb80; border-radius:21px; background:#D5E69B; color:#111310;
  cursor:pointer; gap:7px; transition:background .15s, border-color .15s, box-shadow .15s;
 }
 .st-key-home_budget_period_card button::before {
  content:"BUDGET PERIOD"; font:700 11px Arial,Helvetica,sans-serif; letter-spacing:1.3px; color:#52623a;
 }
+.st-key-home_budget_period_card button [data-testid="stMarkdownContainer"] {
+ display:block; width:100%; text-align:left; align-self:stretch;
+ justify-content:flex-start; align-items:flex-start;
+}
 .st-key-home_budget_period_card button p {
  font:800 clamp(32px,3.5vw,44px)/1.12 Arial,Helvetica,sans-serif;
- color:#111310; white-space:nowrap !important; word-break:normal; margin:0; letter-spacing:-1px;
+ color:#111310; white-space:nowrap !important; word-break:normal; margin:0; letter-spacing:-1px; text-align:left;
 }
 .st-key-home_budget_period_card button p::after {
  content:"↻"; position:absolute; top:14px; right:22px; font-size:25px; font-weight:500; color:#52623a;
@@ -206,7 +210,7 @@ st.markdown("""
 .st-key-home_remaining_budget .remaining-card { height:100%; box-sizing:border-box; }
 @media(max-width:760px) {
  .st-key-home_budget_cards [data-testid="stHorizontalBlock"]:has(.st-key-home_budget_period_card) { grid-template-columns:minmax(0,1fr); }
- .st-key-home_budget_period_card button { padding:18px; }
+ .st-key-home_budget_period_card button { padding:18px 32px; }
 }
 </style>
 """, unsafe_allow_html=True)
