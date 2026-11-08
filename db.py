@@ -468,6 +468,39 @@ def get_budget_summary(period=None, user_id=None):
     }
 
 
+def get_receipts(start_date, end_date, user_id=None):
+    """The user's confirmed receipts whose purchase date is from start_date to end_date (both included).
+    Dates can be date objects or YYYY-MM-DD text. Used by the Budget Summary page.
+
+    Returns a list, oldest first. Each receipt: id, store, purchase_date (YYYY-MM-DD), total_price and
+    items: a list of {ingredient_name (None if unrecognized), raw_text, price, recognized (True/False)}."""
+    uid = _uid(user_id)
+    start = start_date if isinstance(start_date, str) else start_date.isoformat()
+    end = end_date if isinstance(end_date, str) else end_date.isoformat()
+
+    conn = get_connection()
+    receipts = [
+        {"id": row[0], "store": row[1], "purchase_date": row[2], "total_price": row[3] or 0.0, "items": []}
+        for row in conn.execute(
+            "SELECT id, store, purchase_date, total_price FROM Receipts "
+            "WHERE user_id = ? AND purchase_date BETWEEN ? AND ? ORDER BY purchase_date, id",
+            (uid, start, end),
+        ).fetchall()
+    ]
+    by_id = {receipt["id"]: receipt for receipt in receipts}
+    for receipt_id, name, raw_text, price, recognized in conn.execute(
+        "SELECT ri.receipt_id, ri.ingredient_name, ri.raw_text, ri.price, ri.recognized "
+        "FROM ReceiptItems ri JOIN Receipts r ON r.id = ri.receipt_id "
+        "WHERE r.user_id = ? AND r.purchase_date BETWEEN ? AND ? ORDER BY ri.id",
+        (uid, start, end),
+    ).fetchall():
+        by_id[receipt_id]["items"].append({
+            "ingredient_name": name, "raw_text": raw_text, "price": price, "recognized": bool(recognized),
+        })
+    conn.close()
+    return receipts
+
+
 def get_spending_summary(user_id=None):
     """The WEEKLY summary, kept for code written before the monthly budget (Home, the recommender).
     budget, spent and remaining are unchanged; the other keys are new. For the period the user
