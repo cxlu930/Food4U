@@ -1,10 +1,11 @@
-"""Module C: AI receipt recognition and confirmation without database writes."""
+"""Module C: AI receipt recognition, confirmation, and database integration."""
 
 from datetime import date
 from hashlib import sha256
 from io import BytesIO
 
 from data.ingredients import UNITS
+from db import save_confirmed_receipt
 
 from PIL import Image, UnidentifiedImageError
 import streamlit as st
@@ -15,7 +16,7 @@ st.page_link("app.py", label="← Back to Home")
 
 st.title("Upload Receipt")
 st.info("Upload a grocery receipt to extract items using Gemini AI.")
-st.caption("Review and edit the extracted information before confirming. Database integration is pending.")
+st.caption("Review and edit the extracted information before saving to your Pantry.")
 uploaded = st.file_uploader("Upload a receipt image", type=["jpg", "jpeg", "png"])
 if uploaded is None:
     st.info("Upload a JPG, JPEG or PNG receipt to start AI recognition.")
@@ -55,7 +56,11 @@ if not catalog:
     st.info("The ingredient catalog is not ready. Items may remain unrecognized until valid ingredients are available.")
 
 st.subheader("Review AI-Extracted Receipt")
-st.caption("Checked = recognized; unchecked = unrecognized. Recognition is recalculated from your selected ingredient on confirmation. Unrecognized items will not enter the pantry when database integration is added.")
+st.caption(
+    "Recognition is determined by the selected ingredient. "
+    "Recognized items will be added to your Pantry after confirmation. "
+    "Unrecognized items will be saved in the receipt history but not added to Pantry."
+)
 with st.form(f"receipt_c_form_{receipt_id}"):
     store = st.text_input("Store", value=receipt["store"], disabled=confirmed)
     purchase_date = st.date_input("Purchase date", value=date.fromisoformat(receipt["purchase_date"]), disabled=confirmed)
@@ -80,18 +85,36 @@ with st.form(f"receipt_c_form_{receipt_id}"):
 
 if submitted and not confirmed:
     try:
-        payload = prepare_confirmation(
-            {"store": store, "purchase_date": purchase_date.isoformat(), "total_price": total_price},
+        receipt_data, items_data = prepare_confirmation(
+            {
+                "store": store,
+                "purchase_date": purchase_date.isoformat(),
+                "total_price": total_price,
+            },
             edited_items,
         )
-    except ValueError as error:
-        st.error(str(error))
+
+        saved = save_confirmed_receipt(receipt_data, items_data)
+
+    except Exception as error:
+        st.error(f"Failed to save receipt: {error}")
+
     else:
-        # Integration point for D: save_confirmed_receipt(*payload).
-        # Enable once D provides the idempotent API; mark confirmed after success.
-        confirmations[receipt_id] = payload
+        confirmations[receipt_id] = (receipt_data, items_data)
+
+        if saved:
+            st.session_state[f"receipt_c_saved_{receipt_id}"] = True
+        else:
+            st.session_state[f"receipt_c_saved_{receipt_id}"] = False
+
         st.rerun()
 
 if confirmed:
-    
-    st.success("Receipt confirmed for this session. Database integration is pending, so nothing has been permanently saved.")
+    if st.session_state.get(f"receipt_c_saved_{receipt_id}", False):
+        st.success(
+            "Receipt saved successfully! Pantry inventory and spending have been updated."
+        )
+    else:
+        st.warning(
+            "This receipt was already saved. No duplicate items were added."
+        )
