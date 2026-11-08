@@ -1,6 +1,6 @@
 # Food4U 🥬
 
-**Less waste. More taste.**
+**Your Food. Your Budget. Your Way.**
 
 A smarter way to plan meals, manage groceries, and make the most of what's already in your kitchen.
 
