@@ -1,6 +1,7 @@
 """Receipt extraction using Gemini AI and contract validation."""
 
 import os
+import streamlit as st
 from collections.abc import Mapping
 from datetime import date
 from math import isfinite
@@ -39,8 +40,12 @@ def parse_receipt(image_bytes):
         raise ValueError("Upload a receipt image first.")
 
     api_key = os.getenv("GEMINI_API_KEY")
+
     if not api_key:
-        raise ValueError("GEMINI_API_KEY not found.")
+        try:
+            api_key = st.secrets["GEMINI_API_KEY"]
+        except (KeyError, FileNotFoundError):
+            raise ValueError("GEMINI_API_KEY not found.") from None
 
     client = genai.Client(api_key=api_key)
 
