@@ -1,6 +1,7 @@
+import os
 import re
 import sqlite3
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 
 import streamlit as st
 
@@ -12,7 +13,20 @@ DB_PATH = "food4u.db"
 SEED_SAMPLE_DATA = False
 
 
+_schema_ready = False
+
+
 def get_connection():
+    # The first connection (or the first after food4u.db was deleted) makes sure the tables exist,
+    # so it does not matter which page a visitor opens first.
+    global _schema_ready
+    if not _schema_ready or not os.path.exists(DB_PATH):
+        _schema_ready = True  # set first: init_db() connects too
+        try:
+            init_db()
+        except Exception:
+            _schema_ready = False
+            raise
     return sqlite3.connect(DB_PATH)
 
 
@@ -85,7 +99,7 @@ def _migrate_to_users(conn):
 
 
 def init_db():
-    conn = get_connection()
+    conn = sqlite3.connect(DB_PATH)  # not get_connection(): that calls init_db()
     _migrate_to_users(conn)
     conn.executescript(
         """
@@ -135,6 +149,14 @@ def init_db():
             purchase_date TEXT,          -- YYYY-MM-DD
             expiry_date TEXT,            -- purchase_date + shelf_days (an estimate)
             source_receipt_id INTEGER
+        );
+
+        -- recipe_id is the "id" of a recipe in data/recipes.json. One row per visitor and recipe.
+        CREATE TABLE IF NOT EXISTS Favorites (
+            user_id TEXT NOT NULL,
+            recipe_id INTEGER NOT NULL,
+            created_at TEXT NOT NULL,
+            PRIMARY KEY (user_id, recipe_id)
         );
         """
     )
@@ -361,6 +383,37 @@ def get_spending_summary(user_id=None):
     conn.close()
 
     return {"budget": budget, "spent": round(spent, 2), "remaining": round(budget - spent, 2)}
+
+
+def add_favorite(recipe_id, user_id=None):
+    """Save a recipe as a favorite. Saving it twice is fine."""
+    uid = _uid(user_id)
+    conn = get_connection()
+    conn.execute(
+        "INSERT OR IGNORE INTO Favorites (user_id, recipe_id, created_at) VALUES (?, ?, ?)",
+        (uid, int(recipe_id), datetime.now().isoformat(timespec="seconds")),
+    )
+    conn.commit()
+    conn.close()
+
+
+def remove_favorite(recipe_id, user_id=None):
+    uid = _uid(user_id)
+    conn = get_connection()
+    conn.execute("DELETE FROM Favorites WHERE user_id = ? AND recipe_id = ?", (uid, int(recipe_id)))
+    conn.commit()
+    conn.close()
+
+
+def get_favorites(user_id=None):
+    """recipe_id of every favorite, the most recently saved first."""
+    uid = _uid(user_id)
+    conn = get_connection()
+    rows = conn.execute(
+        "SELECT recipe_id FROM Favorites WHERE user_id = ? ORDER BY created_at DESC, rowid DESC", (uid,)
+    ).fetchall()
+    conn.close()
+    return [row[0] for row in rows]
 
 
 if __name__ == "__main__":
