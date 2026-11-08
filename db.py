@@ -1,5 +1,8 @@
+import re
 import sqlite3
 from datetime import date, timedelta
+
+import streamlit as st
 
 from data.ingredients import INGREDIENTS
 
@@ -13,13 +16,82 @@ def get_connection():
     return sqlite3.connect(DB_PATH)
 
 
+def clean_nickname(text):
+    """Lowercase, keep letters, digits, spaces, - and _ (any language). '' if nothing is left."""
+    text = re.sub(r"[^\w -]", "", (text or "").lower())
+    return re.sub(r"\s+", " ", text).strip()[:30]
+
+
+def current_user():
+    """Nickname of the current visitor, or None if they have not entered one yet."""
+    name = st.session_state.get("nickname")
+    if not name:
+        name = clean_nickname(st.query_params.get("u", ""))
+        if name:
+            st.session_state["nickname"] = name
+    return name or None
+
+
+def require_user():
+    """Return the current nickname. With no nickname yet, show the nickname form and stop the page."""
+    name = current_user()
+    if name:
+        if st.query_params.get("u") != name:
+            st.query_params["u"] = name  # keep the nickname in the URL so a reload keeps it
+        return name
+
+    st.title("Welcome to Food4U")
+    st.write(
+        "Type a nickname to get your own preferences, pantry and budget. "
+        "Use the same nickname next time to see them again."
+    )
+    with st.form("food4u_nickname"):
+        nickname = st.text_input("Nickname", max_chars=30)
+        start = st.form_submit_button("Start")
+    if start:
+        name = clean_nickname(nickname)
+        if name:
+            st.session_state["nickname"] = name
+            st.query_params["u"] = name
+            st.rerun()
+        st.error("Please type a nickname with letters or numbers.")
+    st.stop()
+
+
+def sign_out():
+    st.session_state.pop("nickname", None)
+    st.query_params.clear()
+    st.rerun()
+
+
+def _uid(user_id=None):
+    # Pages never pass user_id: it is the current visitor. Tests and scripts can pass one.
+    return user_id or require_user()
+
+
+def _migrate_to_users(conn):
+    """Old databases have no user_id. Upgrade them in place so nobody has to delete food4u.db."""
+
+    def columns(table):
+        return [row[1] for row in conn.execute(f"PRAGMA table_info({table})")]
+
+    prefs = columns("UserPreferences")
+    if prefs and "user_id" not in prefs:
+        conn.execute("DROP TABLE UserPreferences")  # old single-row table, recreated below
+    for table in ("Receipts", "PantryItems"):
+        cols = columns(table)
+        if cols and "user_id" not in cols:
+            conn.execute(f"ALTER TABLE {table} ADD COLUMN user_id TEXT NOT NULL DEFAULT 'guest'")
+
+
 def init_db():
     conn = get_connection()
+    _migrate_to_users(conn)
     conn.executescript(
         """
-        -- Only one row (id = 1): there are no user accounts yet.
+        -- One row per visitor (their nickname).
         CREATE TABLE IF NOT EXISTS UserPreferences (
-            id INTEGER PRIMARY KEY,
+            user_id TEXT PRIMARY KEY,
             weekly_budget REAL,
             cuisines TEXT,               -- comma-separated, e.g. "chinese,japanese"
             spice_level INTEGER,         -- 0 none, 1 mild, 2 medium, 3 hot
@@ -37,6 +109,7 @@ def init_db():
 
         CREATE TABLE IF NOT EXISTS Receipts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT NOT NULL DEFAULT 'guest',
             store TEXT,
             purchase_date TEXT,
             total_price REAL             -- real price from the receipt
@@ -55,6 +128,7 @@ def init_db():
         -- deleting a pantry item must NOT delete the receipt record.
         CREATE TABLE IF NOT EXISTS PantryItems (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT NOT NULL DEFAULT 'guest',
             ingredient_name TEXT NOT NULL,
             quantity REAL,
             unit TEXT,
@@ -111,11 +185,13 @@ def _seed_sample_data(conn):
 # ---------------------------------------------------------------------------
 
 
-def get_preferences():
+def get_preferences(user_id=None):
+    uid = _uid(user_id)
     conn = get_connection()
     row = conn.execute(
         "SELECT weekly_budget, cuisines, spice_level, flavor, avoid_tags "
-        "FROM UserPreferences WHERE id = 1"
+        "FROM UserPreferences WHERE user_id = ?",
+        (uid,),
     ).fetchone()
     conn.close()
 
@@ -138,18 +214,20 @@ def get_preferences():
     }
 
 
-def save_preferences(prefs):
+def save_preferences(prefs, user_id=None):
+    uid = _uid(user_id)
     flavor = prefs["flavor"]
     if isinstance(flavor, str):  # accept "savory,sour" too, in case a page still sends text
         flavor = flavor.split(",")
 
     conn = get_connection()
-    # INSERT OR REPLACE with id = 1 overwrites the single preferences row.
+    # INSERT OR REPLACE overwrites this visitor's row (user_id is the primary key).
     conn.execute(
         "INSERT OR REPLACE INTO UserPreferences "
-        "(id, weekly_budget, cuisines, spice_level, flavor, avoid_tags) "
-        "VALUES (1, ?, ?, ?, ?, ?)",
+        "(user_id, weekly_budget, cuisines, spice_level, flavor, avoid_tags) "
+        "VALUES (?, ?, ?, ?, ?, ?)",
         (
+            uid,
             prefs["weekly_budget"],
             ",".join(prefs["cuisines"]),
             prefs["spice_level"],
@@ -161,13 +239,15 @@ def save_preferences(prefs):
     conn.close()
 
 
-def get_pantry_items():
+def get_pantry_items(user_id=None):
+    uid = _uid(user_id)
     conn = get_connection()
     rows = conn.execute(
         "SELECT id, ingredient_name, quantity, unit, purchase_date, expiry_date, "
         "source_receipt_id FROM PantryItems "
-        "WHERE quantity > 0 "
-        "ORDER BY expiry_date IS NULL, expiry_date"
+        "WHERE quantity > 0 AND user_id = ? "
+        "ORDER BY expiry_date IS NULL, expiry_date",
+        (uid,),
     ).fetchall()
     conn.close()
 
@@ -201,21 +281,22 @@ def get_pantry_items():
     return items
 
 
-def save_confirmed_receipt(receipt, items):
-    """Save a receipt the user confirmed. Returns True if saved, False if it was
-    already saved (same store, date and total), so spending never counts twice."""
+def save_confirmed_receipt(receipt, items, user_id=None):
+    """Save a receipt the user confirmed. Returns True if saved, False if this visitor already
+    saved it (same store, date and total), so spending never counts twice."""
+    uid = _uid(user_id)
     conn = get_connection()
     try:
         already_saved = conn.execute(
-            "SELECT 1 FROM Receipts WHERE store = ? AND purchase_date = ? AND total_price = ?",
-            (receipt["store"], receipt["purchase_date"], receipt["total_price"]),
+            "SELECT 1 FROM Receipts WHERE user_id = ? AND store = ? AND purchase_date = ? AND total_price = ?",
+            (uid, receipt["store"], receipt["purchase_date"], receipt["total_price"]),
         ).fetchone()
         if already_saved:
             return False
 
         cursor = conn.execute(
-            "INSERT INTO Receipts (store, purchase_date, total_price) VALUES (?, ?, ?)",
-            (receipt["store"], receipt["purchase_date"], receipt["total_price"]),
+            "INSERT INTO Receipts (user_id, store, purchase_date, total_price) VALUES (?, ?, ?, ?)",
+            (uid, receipt["store"], receipt["purchase_date"], receipt["total_price"]),
         )
         receipt_id = cursor.lastrowid
         purchase_date = date.fromisoformat(receipt["purchase_date"])
@@ -234,10 +315,10 @@ def save_confirmed_receipt(receipt, items):
             if recognized:  # unrecognized items are NOT added to the pantry
                 expiry_date = purchase_date + timedelta(days=INGREDIENTS[name]["shelf_days"])
                 conn.execute(
-                    "INSERT INTO PantryItems (ingredient_name, quantity, unit, "
+                    "INSERT INTO PantryItems (user_id, ingredient_name, quantity, unit, "
                     "purchase_date, expiry_date, source_receipt_id) "
-                    "VALUES (?, ?, ?, ?, ?, ?)",
-                    (name, item["quantity"], item["unit"], purchase_date.isoformat(),
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    (uid, name, item["quantity"], item["unit"], purchase_date.isoformat(),
                      expiry_date.isoformat(), receipt_id),
                 )
 
@@ -250,18 +331,22 @@ def save_confirmed_receipt(receipt, items):
         conn.close()
 
 
-def update_pantry_quantity(item_id, quantity):
-    """Set the quantity of one pantry item. 0 = used up (hidden, but the row stays).
-    Only touches PantryItems, never Receipts."""
+def update_pantry_quantity(item_id, quantity, user_id=None):
+    """Set the quantity of one of this visitor's pantry items. 0 = used up (hidden, but the row
+    stays). Only touches PantryItems, never Receipts."""
+    uid = _uid(user_id)
     quantity = max(quantity, 0)
     conn = get_connection()
-    conn.execute("UPDATE PantryItems SET quantity = ? WHERE id = ?", (quantity, item_id))
+    conn.execute(
+        "UPDATE PantryItems SET quantity = ? WHERE id = ? AND user_id = ?", (quantity, item_id, uid)
+    )
     conn.commit()
     conn.close()
 
 
-def get_spending_summary():
-    budget = get_preferences()["weekly_budget"]
+def get_spending_summary(user_id=None):
+    uid = _uid(user_id)
+    budget = get_preferences(uid)["weekly_budget"]
 
     today = date.today()
     monday = today - timedelta(days=today.weekday())
@@ -270,8 +355,8 @@ def get_spending_summary():
     conn = get_connection()
     spent = conn.execute(
         "SELECT COALESCE(SUM(total_price), 0) FROM Receipts "
-        "WHERE purchase_date BETWEEN ? AND ?",
-        (monday.isoformat(), sunday.isoformat()),
+        "WHERE user_id = ? AND purchase_date BETWEEN ? AND ?",
+        (uid, monday.isoformat(), sunday.isoformat()),
     ).fetchone()[0]
     conn.close()
 

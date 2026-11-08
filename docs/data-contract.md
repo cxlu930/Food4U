@@ -186,6 +186,12 @@ get_spending_summary() -> dict
 
 A, B, C only call these. They never write SQL.
 
+**Users.** Every visitor enters a nickname, and all of the data above belongs to that nickname.
+Pages do NOT pass a user: each function finds the current visitor itself. If nobody has entered a
+nickname yet, the function shows the nickname form and stops the page, so a page never has to
+handle "no user". Every function also accepts an optional `user_id=` (used by tests and scripts).
+`get_pantry_items()` and the others only ever return the current user's rows.
+
 ## 8. Streamlit notes
 
 - Every click re-runs the whole script. Keep temporary UI state in `st.session_state`,
