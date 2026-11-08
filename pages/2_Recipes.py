@@ -64,8 +64,10 @@ st.markdown(
       font-size:18px; font-weight:600;
     }
     .st-key-recipes_page [data-testid="stButtonGroup"] button p { font-size:18px; font-weight:inherit; }
-    .st-key-recipes_page [data-testid="stButtonGroup"] button[aria-checked="true"] {
-      background:#B8E33D; border-color:#B8E33D; color:#111310; font-weight:800;
+    /* Streamlit renders this active kind from the recipes_mode widget state. */
+    .st-key-recipes_page [data-testid="stButtonGroup"] button[data-testid="stBaseButton-segmented_controlActive"],
+    .st-key-recipes_page [data-testid="stButtonGroup"] button[data-testid="stBaseButton-segmented_controlActive"]:hover {
+      background:#D5E69B !important; border-color:#9DBD43 !important; color:#111310; font-weight:800;
     }
     .st-key-recipes_page [data-testid="stButtonGroup"] button:hover { border-color:#9BC336; }
     .st-key-recipes_page [role="radiogroup"] { gap:8px; flex-wrap:wrap; }
