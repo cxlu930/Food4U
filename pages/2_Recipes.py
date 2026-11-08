@@ -91,6 +91,8 @@ def render_card(result):
 
 
 # ---------- Header and mode switch ----------
+st.page_link("app.py", label="← Back to Home")
+
 st.title("Recipes")
 
 mode_label = st.segmented_control(
