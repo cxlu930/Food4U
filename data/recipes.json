@@ -498,5 +498,55 @@
     "time_minutes": 20,
     "estimated_price": 3.0,
     "ingredients": ["napa_cabbage", "tofu", "egg", "sesame_oil", "salt", "black_pepper"]
+  },
+  {
+    "id": 51,
+    "name": "Garlic Shrimp and Cabbage Stir-fry",
+    "cuisine": "chinese",
+    "spice_level": 0,
+    "flavor": "savory",
+    "time_minutes": 15,
+    "estimated_price": 5.0,
+    "ingredients": ["shrimp", "cabbage", "garlic", "ginger", "vegetable_oil", "soy_sauce", "salt"]
+  },
+  {
+    "id": 52,
+    "name": "Eggs in Tomato Sauce",
+    "cuisine": "western",
+    "spice_level": 0,
+    "flavor": "savory",
+    "time_minutes": 25,
+    "estimated_price": 3.0,
+    "ingredients": ["egg", "canned_tomato", "onion", "garlic", "olive_oil", "salt", "black_pepper"]
+  },
+  {
+    "id": 53,
+    "name": "Garlic Butter Chicken with Onions",
+    "cuisine": "western",
+    "spice_level": 0,
+    "flavor": "savory",
+    "time_minutes": 30,
+    "estimated_price": 4.5,
+    "ingredients": ["chicken", "butter", "garlic", "onion", "salt", "black_pepper"]
+  },
+  {
+    "id": 54,
+    "name": "Ginger Chicken and Cabbage Soup",
+    "cuisine": "chinese",
+    "spice_level": 0,
+    "flavor": "mild",
+    "time_minutes": 30,
+    "estimated_price": 4.0,
+    "ingredients": ["chicken", "cabbage", "ginger", "salt", "black_pepper"]
+  },
+  {
+    "id": 55,
+    "name": "Chocolate Marshmallow Bites",
+    "cuisine": "western",
+    "spice_level": 0,
+    "flavor": "sweet",
+    "time_minutes": 10,
+    "estimated_price": 2.5,
+    "ingredients": ["dark_chocolate", "marshmallow", "butter"]
   }
 ]

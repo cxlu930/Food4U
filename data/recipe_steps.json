@@ -1730,5 +1730,162 @@
     "egg"
    ]
   }
+ ],
+ "51": [
+  {
+   "text": "Peel and devein the shrimp if needed and pat them dry. Shred the cabbage, mince the garlic and slice the ginger.",
+   "ingredients": [
+    "shrimp",
+    "cabbage",
+    "garlic",
+    "ginger"
+   ]
+  },
+  {
+   "text": "Heat oil in a pan or wok. Fry the garlic and ginger for a few seconds until fragrant.",
+   "ingredients": [
+    "vegetable_oil",
+    "garlic",
+    "ginger"
+   ]
+  },
+  {
+   "text": "Add the shrimp and cook until they turn pink and curl, then push them to the side. Add the cabbage and stir-fry until it wilts.",
+   "ingredients": [
+    "shrimp",
+    "cabbage"
+   ]
+  },
+  {
+   "text": "Season with soy sauce and a pinch of salt, toss everything together and serve hot.",
+   "ingredients": [
+    "soy_sauce",
+    "salt"
+   ]
+  }
+ ],
+ "52": [
+  {
+   "text": "Dice the onion and mince the garlic.",
+   "ingredients": [
+    "onion",
+    "garlic"
+   ]
+  },
+  {
+   "text": "Heat olive oil in a wide pan. Cook the onion until soft, then add the garlic for a minute.",
+   "ingredients": [
+    "olive_oil",
+    "onion",
+    "garlic"
+   ]
+  },
+  {
+   "text": "Pour in the canned tomato, add salt and black pepper, and simmer until the sauce thickens a little.",
+   "ingredients": [
+    "canned_tomato",
+    "salt",
+    "black_pepper"
+   ]
+  },
+  {
+   "text": "Make small wells in the sauce and crack an egg into each. Cover and cook until the whites are set and the yolks are as firm as you like. Serve hot.",
+   "ingredients": [
+    "egg"
+   ]
+  }
+ ],
+ "53": [
+  {
+   "text": "Slice the onion and mince the garlic. Pat the chicken dry and season it with salt and black pepper.",
+   "ingredients": [
+    "onion",
+    "garlic",
+    "chicken",
+    "salt",
+    "black_pepper"
+   ]
+  },
+  {
+   "text": "Melt half of the butter in a pan. Cook the chicken until golden on both sides, then take it out.",
+   "ingredients": [
+    "butter",
+    "chicken"
+   ]
+  },
+  {
+   "text": "Add the rest of the butter, the onion and the garlic. Cook until the onion is soft and golden.",
+   "ingredients": [
+    "butter",
+    "onion",
+    "garlic"
+   ]
+  },
+  {
+   "text": "Return the chicken to the pan and cook, turning it, until it is cooked through with no pink inside. Spoon the garlic butter over it and serve.",
+   "ingredients": [
+    "chicken",
+    "butter"
+   ]
+  }
+ ],
+ "54": [
+  {
+   "text": "Cut the chicken into bite-size pieces. Slice the ginger and cut the cabbage into pieces.",
+   "ingredients": [
+    "chicken",
+    "ginger",
+    "cabbage"
+   ]
+  },
+  {
+   "text": "Put the chicken and ginger in a pot with water. Bring to a boil and skim off any foam.",
+   "ingredients": [
+    "chicken",
+    "ginger"
+   ]
+  },
+  {
+   "text": "Lower the heat and simmer until the chicken is cooked through. Add the cabbage and simmer until it is tender.",
+   "ingredients": [
+    "chicken",
+    "cabbage"
+   ]
+  },
+  {
+   "text": "Season with salt and black pepper, taste, and serve hot.",
+   "ingredients": [
+    "salt",
+    "black_pepper"
+   ]
+  }
+ ],
+ "55": [
+  {
+   "text": "Break the dark chocolate into small pieces. Line a small tray or plate with baking paper.",
+   "ingredients": [
+    "dark_chocolate"
+   ]
+  },
+  {
+   "text": "Melt the chocolate with the butter in a bowl over hot water, or in the microwave in short bursts, stirring until smooth.",
+   "ingredients": [
+    "dark_chocolate",
+    "butter"
+   ]
+  },
+  {
+   "text": "Let it cool for a minute, then stir in the marshmallows until they are coated.",
+   "ingredients": [
+    "marshmallow"
+   ]
+  },
+  {
+   "text": "Spoon small mounds onto the tray and chill until firm. Keep them in the fridge.",
+   "ingredients": [
+    "dark_chocolate",
+    "marshmallow"
+   ]
+  }
  ]
 }
