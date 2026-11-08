@@ -1,11 +1,12 @@
 import base64
 from html import escape
 from pathlib import Path
+from urllib.parse import quote
 
 import streamlit as st
 
 from data.ingredients import SPICE_LEVELS
-from db import get_preferences, get_spending_summary, init_db
+from db import current_user, get_preferences, get_spending_summary, init_db, sign_out
 from services.recommender import get_recommendations
 
 st.set_page_config(page_title="Food4U", page_icon="🌿", layout="wide")
@@ -58,8 +59,10 @@ st.markdown("""
 .f4u .brand { display:flex; align-items:center; gap:10px; font-size:25px; font-weight:800; }
 .f4u .brand .icon { width:39px; height:39px; }
 .f4u .brand-row { display:flex; justify-content:space-between; align-items:center; }
-.f4u .settings { display:flex; gap:7px; align-items:center; font-size:13px; opacity:.7; }
-.f4u .settings .icon { width:20px; height:20px; }
+[data-testid="stMainBlockContainer"] { position: relative; }
+.st-key-settings_menu { position:absolute; top:24px; right:36px; width:auto; z-index:20; }
+.st-key-settings_menu button { background:transparent; border:0; box-shadow:none; color:#111310; font-size:13px; opacity:.7; padding:4px 8px; min-height:0; }
+.st-key-settings_menu button:hover { opacity:1; background:#efeadd; }
 .f4u .hero { display:grid; grid-template-columns: 1.45fr 1fr; align-items:center; min-height:270px; gap:30px; }
 .f4u h1 { font-family:Arial,Helvetica,sans-serif !important; color:#111310; font-weight:800 !important; font-size:clamp(42px,4.7vw,70px) !important; line-height:1.01 !important; letter-spacing:-2.5px; margin:12px 0 14px; padding:0; }
 .f4u h1 .underline { position:relative; white-space:nowrap; }
@@ -148,6 +151,7 @@ st.markdown("""
 
 init_db()
 prefs = get_preferences() or {}
+nick_q = "?u=" + quote(current_user() or "")  # plain links reload the app, so they carry the nickname
 summary = get_spending_summary()
 spent = summary["spent"]
 budget = float(prefs["weekly_budget"])
@@ -187,25 +191,31 @@ for title, value, glyph in [
     ("Flavors", labels(prefs.get("flavor")), "heart"),
     ("Allergies", labels(prefs.get("avoid_tags")), "allergy"),
 ]:
-    preference_cards += f'<a class="preference" href="./Preferences" target="_self" aria-label="Edit {title}">{icon(glyph)}<div class="preference-copy"><h2>{title}</h2><p title="{escape(value, quote=True)}">{escape(value)}</p></div>{icon("arrow")}</a>'
+    preference_cards += f'<a class="preference" href="./Preferences{nick_q}" target="_self" aria-label="Edit {title}">{icon(glyph)}<div class="preference-copy"><h2>{title}</h2><p title="{escape(value, quote=True)}">{escape(value)}</p></div>{icon("arrow")}</a>'
+
+with st.container(key="settings_menu"):
+    with st.popover("Settings", icon=":material/settings:"):
+        st.markdown(f"Signed in as **{current_user()}**")
+        if st.button("Switch user", key="switch_user", use_container_width=True):
+            sign_out()
 
 st.html(f"""
 <div class="f4u">
- <div class="brand-row"><div class="brand">{icon('leaf')}<span>FOOD4U</span></div><a class="settings" href="./Preferences" target="_self" aria-label="Open Preferences">{icon('settings')}Settings</a></div>
+ <div class="brand-row"><div class="brand">{icon('leaf')}<span>FOOD4U</span></div></div>
  <section class="hero">
   <div><h1>Good food.<br>A little more <span class="underline">ease.</span></h1><p class="intro">Turn your groceries, pantry, and budget<br>into meals you actually want to eat.</p></div>
   <img class="hero-art" src="{artwork('bowl')}" alt="Hand drawn noodle bowl with egg, tomatoes and greens">
  </section>
  <section class="stats" aria-label="Weekly spending overview">
   <div class="stat"><div><h2>Daily Spending</h2><div class="amount">${spent:,.2f}</div><div class="stat-note">{daily_note}</div><div class="daily-empty">Daily breakdown unavailable — no daily chart yet.</div></div></div>
-  <a class="stat remaining-card{' is-over-budget' if remaining < 0 else ''}" href="./Preferences" target="_self" aria-label="Remaining Budget: edit budget in Preferences"><div><div class="stat-heading"><h2>Remaining Budget</h2>{icon('arrow')}</div><div class="amount">${remaining:,.2f}</div><div class="stat-note budget-usage"><span>Weekly budget: ${budget:,.2f}</span><span>{usage_label}</span></div>{budget_progress}{budget_warning}</div></a>
+  <a class="stat remaining-card{' is-over-budget' if remaining < 0 else ''}" href="./Preferences{nick_q}" target="_self" aria-label="Remaining Budget: edit budget in Preferences"><div><div class="stat-heading"><h2>Remaining Budget</h2>{icon('arrow')}</div><div class="amount">${remaining:,.2f}</div><div class="stat-note budget-usage"><span>Weekly budget: ${budget:,.2f}</span><span>{usage_label}</span></div>{budget_progress}{budget_warning}</div></a>
  </section>
  <section class="features" aria-label="Your kitchen">
-  <a class="feature receipt" href="./Receipt" target="_self" aria-label="Upload Receipt: open receipt upload page">
+  <a class="feature receipt" href="./Receipt{nick_q}" target="_self" aria-label="Upload Receipt: open receipt upload page">
    <div class="feature-copy"><h2>Upload<br>Receipt</h2><p>Bring your groceries into your kitchen inventory.</p><div class="upload-target">{icon('upload')}<span>Upload a receipt<br>Click to get started</span></div></div>
    <img src="{artwork('receipt')}" alt="Grocery receipt beside a shopping bag of vegetables">
   </a>
-  <a class="feature pantry" href="./Pantry" target="_self" aria-label="Open My Pantry">
+  <a class="feature pantry" href="./Pantry{nick_q}" target="_self" aria-label="Open My Pantry">
    <div class="feature-copy"><h2>My Pantry</h2><p>See and manage<br>what’s in your kitchen.</p><span class="round-arrow">{icon('arrow')}</span></div>
    <img src="{artwork('pantry')}" alt="Two pantry jars with lime green lids">
   </a>
@@ -240,7 +250,7 @@ with st.container(key="recommendation_details"):
           <div class="recipe-top"><div><span class="eyebrow">PICKED FOR YOUR KITCHEN</span>
           <h2>{escape(recipe['name'])}</h2>
           <p class="recipe-meta">{escape(labels([recipe['cuisine']]))} · {recipe['time_minutes']} min · Estimated ${recipe['estimated_price']:.2f} per serving</p></div>
-          <a class="recipe-open" href="./Recipes" target="_self">View recipe {icon('arrow')}</a></div>
+          <a class="recipe-open" href="./Recipes{nick_q}" target="_self">View recipe {icon('arrow')}</a></div>
           {f'<ul class="recipe-reasons">{reasons}</ul>' if reasons else ''}
           {warnings}<p class="recipe-shopping">{escape(shopping)}</p>
         </article></div>
