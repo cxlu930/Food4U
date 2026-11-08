@@ -1669,5 +1669,66 @@
     "chicken"
    ]
   }
+ ],
+ "49": [
+  {
+   "text": "Cut the bok choy in half or into quarters and rinse well. Cut the tofu into cubes and pat it dry.",
+   "ingredients": [
+    "bok_choy",
+    "tofu"
+   ]
+  },
+  {
+   "text": "Heat oil in a pan. Fry the tofu until golden on the outside, then take it out.",
+   "ingredients": [
+    "tofu",
+    "vegetable_oil"
+   ]
+  },
+  {
+   "text": "In the same pan, cook the bok choy until the stems are just tender and the leaves are wilted.",
+   "ingredients": [
+    "bok_choy"
+   ]
+  },
+  {
+   "text": "Return the tofu to the pan. Add soy sauce and a pinch of salt, toss gently and serve hot.",
+   "ingredients": [
+    "tofu",
+    "soy_sauce",
+    "salt"
+   ]
+  }
+ ],
+ "50": [
+  {
+   "text": "Cut the napa cabbage into bite-size pieces. Cut the tofu into small cubes and beat the eggs.",
+   "ingredients": [
+    "napa_cabbage",
+    "tofu",
+    "egg"
+   ]
+  },
+  {
+   "text": "Heat sesame oil in a pot and cook the napa cabbage until it starts to soften.",
+   "ingredients": [
+    "sesame_oil",
+    "napa_cabbage"
+   ]
+  },
+  {
+   "text": "Add water and bring to a boil. Add the tofu, salt and black pepper and simmer until the cabbage is tender.",
+   "ingredients": [
+    "tofu",
+    "salt",
+    "black_pepper"
+   ]
+  },
+  {
+   "text": "Slowly pour in the beaten eggs while stirring gently, until the egg forms soft ribbons and is cooked through. Serve hot.",
+   "ingredients": [
+    "egg"
+   ]
+  }
  ]
 }
