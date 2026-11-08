@@ -165,6 +165,23 @@ class PreferencesBudgetTests(TestCase):
         self.assertFalse(home.exception)
         self.assertIn("No positive budget allocated", "".join(x.proto.body for x in home.get("html")))
 
+    def test_saved_period_survives_navigation_and_repeated_saves(self):
+        at = self.page()
+        for period in ("monthly", "weekly", "monthly"):
+            at.radio(key="preferences_budget_period").set_value(period).run()
+            at.button[0].click().run()
+            self.assertEqual(db.get_preferences()["budget_period"], period)
+            # Another form submission must keep the selection after the saved default changes.
+            at.run()
+            self.assertEqual(at.radio(key="preferences_budget_period").value, period)
+            at.button[0].click().run()
+            at.switch_page("app.py").run()
+            self.assertFalse(at.exception)
+            self.assertEqual(at.button(key="toggle_budget_period").label, period.title())
+            self.assertEqual(db.get_preferences()["budget_period"], period)
+            at.switch_page("pages/1_Preferences.py").run()
+            self.assertEqual(at.radio(key="preferences_budget_period").value, period)
+
     def test_home_uses_actual_calendar_month_receipts(self):
         db.save_preferences({
             "weekly_budget": 100.0, "monthly_budget": 400.0, "budget_period": "monthly",

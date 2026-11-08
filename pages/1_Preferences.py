@@ -132,7 +132,7 @@ with st.container(key="preferences_page"):
         "Budget period", ["weekly", "monthly"],
         index=["weekly", "monthly"].index(saved_prefs["budget_period"]),
         format_func=str.title, horizontal=True,
-        key=f"preferences_budget_period_{saved_prefs['budget_period']}",
+        key="preferences_budget_period",
     )
     hidden_budget = "monthly" if budget_period == "weekly" else "weekly"
     st.markdown(
