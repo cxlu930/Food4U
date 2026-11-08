@@ -108,12 +108,23 @@ def spice_text(level):
     return "🌶️" * level if level else "Not spicy"
 
 
-@st.cache_data
-def load_steps():
-    """How to cook each recipe (data/recipe_steps.json), keyed by the recipe id as text."""
-    path = Path(__file__).resolve().parent.parent / "data" / "recipe_steps.json"
+STEPS_PATH = Path(__file__).resolve().parent.parent / "data" / "recipe_steps.json"
+
+
+def steps_version():
+    """When the steps file last changed. It is part of the cache key below, so after a
+    redeploy with new steps the old cached copy is not reused."""
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        return STEPS_PATH.stat().st_mtime
+    except OSError:
+        return 0
+
+
+@st.cache_data
+def load_steps(version):
+    """How to cook each recipe (data/recipe_steps.json), keyed by the recipe id as text."""
+    try:
+        return json.loads(STEPS_PATH.read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return {}  # no steps file: the cards simply have no "How to cook"
 
@@ -161,7 +172,7 @@ def render_card(result, favorites, mode=None):
                     for reason in result["reasons"]:
                         st.text(reason)
 
-            steps = load_steps().get(str(recipe["id"]))
+            steps = load_steps(steps_version()).get(str(recipe["id"]))
             if steps:
                 with st.expander("How to cook"):
                     for number, step in enumerate(steps, 1):
