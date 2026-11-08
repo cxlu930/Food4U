@@ -6,7 +6,7 @@ from urllib.parse import quote
 import streamlit as st
 
 from data.ingredients import SPICE_LEVELS
-from db import current_user, get_preferences, get_budget_summary, init_db, sign_out
+from db import current_user, get_preferences, get_budget_summary, init_db, save_preferences, sign_out
 from services.recommender import get_recommendations, load_recipes
 
 st.set_page_config(page_title="Food4U", page_icon="🌿", layout="wide")
@@ -175,11 +175,38 @@ st.markdown("""
 .st-key-recommendation_details [role="radiogroup"] label:has(input:checked) { background:#eaf1cb; border-color:#b8d44f; }
 @media(max-width:760px) { .f4u .recipe-top { align-items:flex-start; flex-direction:column; } .f4u .recipe-result { padding:20px; } }
 
-.st-key-home_budget_view [role="radiogroup"] label {
- border:1px solid #dedbd3; border-radius:999px; padding:7px 15px;
+.st-key-home_budget_cards { margin:8px 0 24px; }
+.st-key-home_budget_cards [data-testid="stHorizontalBlock"]:has(.st-key-home_budget_period_card) {
+ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:stretch;
 }
-.st-key-home_budget_view [role="radiogroup"] label:has(input:checked) {
- background:#D5E69B; border-color:#9DBD43;
+.st-key-home_budget_cards [data-testid="stHorizontalBlock"]:has(.st-key-home_budget_period_card) > [data-testid="stColumn"] { width:100%; min-width:0; }
+.st-key-home_budget_period_card { border:0 !important; padding:0 !important; height:100%; }
+.st-key-home_budget_period_card [data-testid="stElementContainer"],
+.st-key-home_budget_period_card [data-testid="stButton"] { height:100%; }
+.st-key-home_budget_period_card button {
+ position:relative; display:flex; flex-direction:column; align-items:flex-start; justify-content:center;
+ width:100%; height:100%; min-height:146px; padding:18px 30px;
+ border:1px solid #b8cb80; border-radius:21px; background:#D5E69B; color:#111310;
+ cursor:pointer; gap:7px; transition:background .15s, border-color .15s, box-shadow .15s;
+}
+.st-key-home_budget_period_card button::before {
+ content:"BUDGET PERIOD"; font:700 11px Arial,Helvetica,sans-serif; letter-spacing:1.3px; color:#52623a;
+}
+.st-key-home_budget_period_card button p {
+ font:800 clamp(32px,3.5vw,44px)/1.12 Arial,Helvetica,sans-serif;
+ color:#111310; white-space:nowrap !important; word-break:normal; margin:0; letter-spacing:-1px;
+}
+.st-key-home_budget_period_card button p::after {
+ content:"↻"; position:absolute; top:14px; right:22px; font-size:25px; font-weight:500; color:#52623a;
+}
+.st-key-home_budget_period_card button::after { content:"Click anywhere to switch"; font:400 11px Arial,Helvetica,sans-serif; color:#657044; }
+.st-key-home_budget_period_card button:hover { background:#ccdf89; border-color:#9DBD43; color:#111310; box-shadow:0 3px 12px #526b2e15; }
+.st-key-home_budget_period_card button:focus-visible { outline:3px solid #9DBD43; outline-offset:3px; }
+.st-key-home_remaining_budget [data-testid="stHtml"], .st-key-home_remaining_budget .f4u { height:100%; }
+.st-key-home_remaining_budget .remaining-card { height:100%; box-sizing:border-box; }
+@media(max-width:760px) {
+ .st-key-home_budget_cards [data-testid="stHorizontalBlock"]:has(.st-key-home_budget_period_card) { grid-template-columns:minmax(0,1fr); }
+ .st-key-home_budget_period_card button { padding:18px; }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -187,26 +214,25 @@ st.markdown("""
 init_db()
 prefs = get_preferences() or {}
 nick_q = "?u=" + quote(current_user() or "")  # plain links reload the app, so they carry the nickname
-with st.container(key="home_budget_view"):
-    budget_period = st.radio(
-        "Budget view", ["weekly", "monthly"],
-        index=["weekly", "monthly"].index(prefs["budget_period"]),
-        format_func=str.title, horizontal=True,
-        key=f"home_budget_period_{current_user()}_{prefs['budget_period']}",
-    )
-    st.caption("Choose a view here. Save your default period in Preferences.")
+budget_period = prefs["budget_period"]
+
+
+def toggle_home_budget_period():
+    latest_preferences = get_preferences()
+    latest_preferences["budget_period"] = "monthly" if latest_preferences["budget_period"] == "weekly" else "weekly"
+    save_preferences(latest_preferences)
+
+
 summary = get_budget_summary(budget_period)
 spent = summary["spent"]
 budget = float(summary["budget"])
 remaining = summary["remaining"]
 period_label = budget_period.title()
 period_noun = "month" if budget_period == "monthly" else "week"
-period_dates = f"{summary['start_date']} – {summary['end_date']} · Vancouver"
 spice = prefs.get("spice_level")
 if spice is None:
     spice = 0
 
-daily_note = f"No saved spending this {period_noun}." if spent == 0 else f"Spent this {period_noun} · Saved receipts only"
 if budget > 0:
     used_percent = spent / budget * 100
     filled_percent = min(max(used_percent, 0.0), 100.0)
@@ -252,10 +278,27 @@ st.html(f"""
   <div><h1>Good food.<br>A little more <span class="underline">ease.</span></h1><p class="intro">Turn your groceries, pantry, and budget<br>into meals you actually want to eat.</p></div>
   <img class="hero-art" src="{artwork('bowl')}" alt="Hand drawn noodle bowl with egg, tomatoes and greens">
  </section>
- <section class="stats" aria-label="{period_label} spending overview">
-  <div class="stat"><div><h2>{"Monthly Spending" if budget_period == "monthly" else "Daily Spending"}</h2><div class="amount">${spent:,.2f}</div><div class="stat-note">{daily_note}</div><div class="daily-empty">{period_dates} · Daily breakdown unavailable.</div></div></div>
+</div>
+""")
+
+with st.container(key="home_budget_cards"):
+    period_column, remaining_column = st.columns(2, gap="medium")
+    with period_column:
+        with st.container(height="stretch", key="home_budget_period_card"):
+            st.button(
+                period_label, key="toggle_budget_period", width="stretch",
+                on_click=toggle_home_budget_period,
+            )
+    with remaining_column:
+        with st.container(height="stretch", key="home_remaining_budget"):
+            st.html(f"""
+<div class="f4u">
   <a class="stat remaining-card{' is-over-budget' if remaining < 0 else ''}" href="./Preferences{nick_q}" target="_self" aria-label="Remaining Budget: edit budget in Preferences"><div><div class="stat-heading"><h2>Remaining Budget</h2>{icon('arrow')}</div><div class="amount">${remaining:,.2f}</div><div class="stat-note budget-usage"><span>{period_label} budget: ${budget:,.2f}</span><span>{usage_label}</span></div>{budget_progress}{budget_warning}</div></a>
- </section>
+</div>
+""")
+
+st.html(f"""
+<div class="f4u">
  <section class="features" aria-label="Your kitchen">
   <a class="feature receipt" href="./Receipt{nick_q}" target="_self" aria-label="Upload Receipt: open receipt upload page">
    <div class="feature-copy"><h2>Upload<br>Receipt</h2><p>Bring your groceries into your kitchen inventory.</p><div class="upload-target">{icon('upload')}<span>Upload a receipt<br>Click to get started</span></div></div>
