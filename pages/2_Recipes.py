@@ -1,8 +1,10 @@
 import streamlit as st
 
-from data.ingredients import INGREDIENTS
+from data.ingredients import CUISINES, INGREDIENTS
 from db import init_db
 from services.recommender import MODE_COOK, MODE_PLAN, get_recommendations
+
+st.set_page_config(page_title="Recipes · Food4U", page_icon="🍽️", layout="wide")
 
 init_db()
 
@@ -45,6 +47,37 @@ st.markdown(
         background: rgba(128, 128, 128, 0.08);
         overflow: hidden;
     }
+
+    .stApp:has(.st-key-recipes_page) { background:#FDF9F2; color:#111310; }
+    body:has(.st-key-recipes_page) [data-testid="stHeader"],
+    body:has(.st-key-recipes_page) [data-testid="stToolbar"],
+    body:has(.st-key-recipes_page) [data-testid="stSidebar"] { display:none; }
+    body:has(.st-key-recipes_page) [data-testid="stMainBlockContainer"] { max-width:1440px; padding:20px 36px 55px; }
+    .st-key-recipes_page { font-family:Arial,Helvetica,sans-serif; }
+    .st-key-recipes_page h1, .st-key-recipes_page h2, .st-key-recipes_page h3 { font-family:Arial,Helvetica,sans-serif !important; color:#111310; font-weight:800; }
+    .st-key-recipes_page h1 { font-size:clamp(44px,5vw,70px); letter-spacing:-2.5px; }
+    .st-key-recipes_page [data-testid="stPageLink"] a { color:#405326; font-weight:700; }
+    .st-key-recipes_page [data-testid="stMetric"] { background:#edf2da; border:1px solid #d9dbcc; border-radius:20px; padding:16px 22px; margin:6px 0 12px; }
+    .st-key-recipes_page [data-testid="stMetricValue"] { font-size:34px; color:#111310; font-weight:800; }
+    .st-key-recipes_page [data-testid="stButtonGroup"] button { border-radius:999px; background:#FDF9F2; color:#111310; border-color:#dedbd3; }
+    .st-key-recipes_page [data-testid="stButtonGroup"] button[aria-checked="true"] { background:#D2E39A; border-color:#9BC336; }
+    .st-key-recipes_page [role="radiogroup"] { gap:8px; flex-wrap:wrap; }
+    .st-key-recipes_page [role="radiogroup"] label { background:#FDF9F2; border:1px solid #dedbd3; border-radius:999px; padding:7px 13px; margin:0; }
+    .st-key-recipes_page [role="radiogroup"] label:has(input:checked) { background:#D2E39A; border-color:#9BC336; }
+    .st-key-recipes_page [role="radiogroup"] [data-baseweb="radio"] > div:first-child { display:none; }
+    .st-key-recipes_page [class*="st-key-recipe_card_"] { background:#f5f7e9; border:1px solid #d9dfc8 !important; border-radius:22px !important; padding:20px !important; height:100%; }
+    .st-key-recipes_page [class*="st-key-recipe_card_"] [data-testid="stMarkdownContainer"] strong { font-weight:800; color:#17240e; }
+    .st-key-recipes_page [class*="st-key-recipe_card_"] [data-testid="stCaptionContainer"] { color:#657044; }
+    .st-key-recipes_page [class*="st-key-recipe_card_"] [data-testid="stHorizontalBlock"] { align-items:flex-start; }
+    .st-key-recipes_page .f4u-emoji { background:#D2E39A; }
+    .st-key-recipes_page [data-testid="stAlertContainer"] { border-radius:14px; }
+    .st-key-recipes_page [data-testid="stAlertContainer"]:has([data-testid="stAlertContentWarning"]) { background:#fff3c0; color:#9F6634; }
+    .st-key-recipes_page [data-testid="stAlertContainer"]:has([data-testid="stAlertContentInfo"]) { background:#edf2da; color:#405326; }
+    .st-key-recipes_page :is(button,a):focus-visible { outline:2px solid #9BC336; outline-offset:3px; }
+    @media(max-width:760px) {
+      body:has(.st-key-recipes_page) [data-testid="stMainBlockContainer"] { padding:18px; }
+      .st-key-recipes_page [class*="st-key-recipe_card_"] { padding:16px !important; }
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -64,7 +97,7 @@ def render_card(result):
     cuisine = recipe.get("cuisine", "")
     emoji = CUISINE_EMOJI.get(cuisine, "🍽️")
 
-    with st.container(border=True):
+    with st.container(border=True, key=f"recipe_card_{recipe['id']}"):
         left, right = st.columns([1, 3], vertical_alignment="center")
         with left:
             st.markdown(f'<div class="f4u-emoji">{emoji}</div>', unsafe_allow_html=True)
@@ -86,43 +119,71 @@ def render_card(result):
             else:
                 st.markdown("✅ You have everything you need")
 
+            if result.get("reasons"):
+                with st.expander("Why this recipe?"):
+                    for reason in result["reasons"]:
+                        st.text(reason)
+
             if result["warnings"]:
                 st.warning("  \n".join(result["warnings"]), icon="⚠️")
 
 
-# ---------- Header and mode switch ----------
-st.page_link("app.py", label="← Back to Home")
+with st.container(key="recipes_page"):
+    # ---------- Header and mode switch ----------
+    st.page_link("app.py", label="← Back to Home")
 
-st.title("Recipes")
+    st.title("Recipes")
 
-mode_label = st.segmented_control(
-    "Mode", list(MODES), default="Plan My Meals", label_visibility="collapsed"
-) or "Plan My Meals"  # clicking the selected option again clears it: fall back to Plan
-mode, description = MODES[mode_label]
-st.caption(description)
+    mode_label = st.segmented_control(
+        "Mode", list(MODES), default="Plan My Meals", label_visibility="collapsed", key="recipes_mode"
+    ) or "Plan My Meals"  # clicking the selected option again clears it: fall back to Plan
+    mode, description = MODES[mode_label]
+    st.caption(description)
 
-data = get_recommendations(mode)
+    data = get_recommendations(mode)
 
-# ---------- Budget ----------
-budget_col, remaining_col = st.columns(2)
-budget_col.metric("Weekly budget", f"${data['weekly_budget']:.2f}")
-remaining_col.metric("Remaining this week", f"${data['remaining_budget']:.2f}")
+    # ---------- Budget ----------
+    budget_col, remaining_col = st.columns(2)
+    budget_col.metric("Weekly budget", f"${data['weekly_budget']:.2f}")
+    remaining_col.metric("Remaining this week", f"${data['remaining_budget']:.2f}")
 
-if data["using_default_budget"]:
-    st.info("Using default budget of $100. Set your own in Preferences.")
-if data["using_default_spice"]:
-    st.info("Using default spice level: Not spicy. Set your own in Preferences.")
+    if data["using_default_budget"]:
+        st.info("Using default budget of $100. Set your own in Preferences.")
+    if data["using_default_spice"]:
+        st.info("Using default spice level: Not spicy. Set your own in Preferences.")
 
-# ---------- Recipe cards ----------
-results = data["results"]
-if not results:
-    st.info(
-        "No recipes match right now. Try adjusting your settings in Preferences, "
-        "or add ingredients to your Pantry."
+    # ---------- Cuisine filters and recipe cards ----------
+    selected_cuisine = st.radio(
+        "Cuisine", ["all"] + list(CUISINES), horizontal=True,
+        format_func=lambda value: "All" if value == "all" else value.title(),
+        key="recipes_cuisine",
     )
-    link_left, link_right = st.columns(2)
-    link_left.page_link("pages/1_Preferences.py", label="Go to Preferences", icon="⚙️")
-    link_right.page_link("pages/4_Pantry.py", label="Go to Pantry", icon="🧺")
-else:
-    for result in results:
-        render_card(result)
+    results = data["results"]
+    filtered_results = [
+        result for result in results
+        if selected_cuisine == "all" or result["recipe"]["cuisine"] == selected_cuisine
+    ]
+    category_label = "All cuisines" if selected_cuisine == "all" else selected_cuisine.title()
+    st.subheader(category_label)
+    st.caption(f"{len(filtered_results)} recipe{'s' if len(filtered_results) != 1 else ''} · Recommended order")
+
+    if not filtered_results:
+        if results:
+            st.info(
+                f"No {category_label.lower()} recipes match your current settings. "
+                "Try All or another cuisine, or update your preferences."
+            )
+        else:
+            st.info(
+                "No recipes match right now. Try adjusting your settings in Preferences, "
+                "or add ingredients to your Pantry."
+            )
+        link_left, link_right = st.columns(2)
+        link_left.page_link("pages/1_Preferences.py", label="Go to Preferences", icon="⚙️")
+        link_right.page_link("pages/4_Pantry.py", label="Go to Pantry", icon="🧺")
+    else:
+        for start in range(0, len(filtered_results), 2):
+            columns = st.columns(2, gap="medium")
+            for column, result in zip(columns, filtered_results[start:start + 2]):
+                with column:
+                    render_card(result)
