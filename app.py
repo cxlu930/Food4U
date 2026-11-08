@@ -1,14 +1,17 @@
 import base64
 import json
+from hashlib import sha256
+from io import BytesIO
 from html import escape
 from pathlib import Path
 from urllib.parse import quote
 
 import streamlit as st
+from PIL import Image, UnidentifiedImageError
 
 from data.ingredients import INGREDIENTS, SPICE_LEVELS
-from db import current_user, get_preferences, get_budget_summary, init_db, save_preferences, sign_out
-from services.recommender import get_recommendations, load_recipes
+from db import current_user, get_preferences, get_budget_summary, get_spending_summary, init_db, save_preferences, sign_out
+from services.recommender import MODE_COOK, get_recommendations, load_recipes, recommend
 
 st.set_page_config(page_title="Food4U", page_icon="🌿", layout="wide")
 
@@ -43,6 +46,68 @@ def icon(name):
         "settings": '<circle cx="21" cy="21" r="7"/><path d="m17 3 8 0 1 6 5 3 6-2 4 7-5 4v5l5 4-4 7-6-2-5 3-1 5h-8l-1-5-5-3-6 2-4-7 5-4v-5l-5-4 4-7 6 2 5-3Z"/>',
     }
     return svg_image(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" fill="none" stroke="#111310" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">{paths[name]}</svg>')
+
+
+
+def home_fridge_recommendations():
+    """Scan into temporary recommender input; share the standalone scanner's session cache."""
+    with st.container(key="home_fridge_upload"):
+        st.markdown('<div class="fridge-heading"><span aria-hidden="true">📷</span> What’s in your fridge?</div>', unsafe_allow_html=True)
+        st.caption("Upload a photo to discover what you can cook.")
+        uploaded = st.file_uploader(
+            "Upload a fridge photo", type=["jpg", "jpeg", "png"],
+            key="home_fridge_photo", label_visibility="collapsed",
+        )
+    if uploaded is None:
+        return None
+
+    image_bytes = uploaded.getvalue()
+    try:
+        with Image.open(BytesIO(image_bytes)) as image:
+            if image.format not in ("JPEG", "PNG"):
+                raise ValueError("Unsupported image format.")
+            image.load()
+            mime_type = "image/jpeg" if image.format == "JPEG" else "image/png"
+            with st.expander("View fridge photo"):
+                st.image(image, width=280)
+    except (UnidentifiedImageError, OSError, ValueError, Image.DecompressionBombError):
+        st.error("Please upload a valid JPG or PNG image.")
+        return None
+
+    photo_id = sha256(image_bytes).hexdigest()
+    cache = st.session_state.setdefault("fridge_scan_cache", {})
+    if photo_id not in cache:
+        try:
+            from services.fridge_parser import scan_fridge
+
+            with st.spinner("Scanning your fridge with Gemini AI…"):
+                cache[photo_id] = scan_fridge(image_bytes, mime_type)
+        except Exception as error:
+            st.error(f"Fridge scanning failed: {error}")
+            return None
+
+    detected = cache[photo_id]
+    if not detected:
+        st.caption("No recognizable ingredients were found. Try a clearer photo.")
+        return None
+    tags = "".join(
+        f'<span class="fridge-tag">{escape(INGREDIENTS[name]["display_name"])}</span>'
+        for name in detected
+    )
+    st.html(f'<div class="fridge-detected"><span class="fridge-detected-label">Detected ingredients</span><div class="fridge-tags">{tags}</div></div>')
+    temporary_pantry = [
+        {"ingredient_name": name, "quantity": 1, "status": "fresh"}
+        for name in detected
+    ]
+    try:
+        return recommend(
+            recipes=load_recipes(), prefs=get_preferences(),
+            pantry_items=temporary_pantry, spent=get_spending_summary()["spent"],
+            mode=MODE_COOK,
+        )
+    except (OSError, ValueError, KeyError):
+        st.info("Recipe ideas are temporarily unavailable. Please try again later.")
+        return None
 
 
 st.markdown("""
@@ -125,8 +190,8 @@ st.markdown("""
 .st-key-recommendation_details [data-testid="stRadio"] {
  margin:24px 0 !important;
 }
-.st-key-recommendation_details > [data-testid="stElementContainer"]:has([data-testid="stHtml"])
- ~ [data-testid="stElementContainer"]:has([data-testid="stHtml"]) { margin-top:16px; }
+.st-key-recommendation_details > [data-testid="stElementContainer"]:has(.mini-recipe)
+ ~ [data-testid="stElementContainer"]:has(.mini-recipe) { margin-top:16px; }
 .st-key-home_recommendation_row .st-key-recommendation_details .recipe-result { border:0; padding:0; background:transparent; margin-top:6px; }
 .st-key-home_recommendation_row .st-key-recommendation_details .recipe-top { justify-content:flex-start; flex-wrap:wrap; gap:8px 14px; }
 .st-key-home_recommendation_row .st-key-recommendation_details .recipe-result h2 { font-size:25px; }
@@ -187,6 +252,21 @@ st.markdown("""
 .st-key-recommendation_details [data-testid="stExpander"] summary { padding:12px 14px; }
 @media(max-width:760px) { .f4u .recipe-top { align-items:flex-start; flex-direction:column; } .f4u .recipe-result { padding:20px; } }
 
+
+
+.st-key-home_fridge_upload { background:#EDF3D8; border:1px dashed #a9b98b; border-radius:14px; padding:14px; gap:8px; margin-bottom:16px; }
+.st-key-home_fridge_upload .fridge-heading { font-size:16px; font-weight:750; color:#283619; }
+.st-key-home_fridge_upload .fridge-heading span { margin-right:6px; }
+.st-key-home_fridge_upload [data-testid="stFileUploaderDropzone"] { background:#fffdf7; border:0; border-radius:10px; padding:12px; }
+.st-key-home_fridge_upload [data-testid="stFileUploaderDropzone"] button { background:#C5E95D; border:1px solid #b6d650; color:#17240e; border-radius:999px; font-weight:700; }
+.st-key-home_fridge_upload [data-testid="stFileUploaderDropzoneInstructions"] { min-width:0; }
+.st-key-recommendation_details .fridge-detected { margin-bottom:16px; }
+.st-key-recommendation_details .fridge-detected-label { display:block; font-size:11px; color:#687347; margin-bottom:7px; }
+.st-key-recommendation_details .fridge-tags { display:flex; flex-wrap:wrap; gap:5px; }
+.st-key-recommendation_details .fridge-tag { padding:4px 8px; border-radius:999px; background:#fffdf7; border:1px solid #dce2cc; color:#405326; font-size:12px; }
+@media(max-width:760px) {
+ .st-key-home_fridge_upload [data-testid="stFileUploaderDropzone"] { flex-wrap:wrap; gap:8px; }
+}
 
 /* Home mini recipe details: native disclosure keeps expansion on this page. */
 .st-key-recommendation_details .mini-recipe { border:1px solid #d9dfcb; border-radius:16px; background:#fffdf7; overflow:hidden; font-family:Arial,Helvetica,sans-serif; color:#17240e; }
@@ -377,11 +457,14 @@ with st.container(key="home_recommendation_row"):
             )
             mode = "plan_my_meals" if mode_label == "Plan my meals" else "cook_with_what_i_have"
             recommendations = None
-            try:
-                with st.spinner("Finding ideas for your kitchen…"):
-                    recommendations = get_recommendations(mode)
-            except (OSError, ValueError, KeyError):
-                st.info("Recipe ideas are temporarily unavailable. Please try again later.")
+            if mode == MODE_COOK:
+                recommendations = home_fridge_recommendations()
+            else:
+                try:
+                    with st.spinner("Finding ideas for your kitchen…"):
+                        recommendations = get_recommendations(mode)
+                except (OSError, ValueError, KeyError):
+                    st.info("Recipe ideas are temporarily unavailable. Please try again later.")
             results = recommendations.get("results", []) if recommendations is not None else []
             if results:
                 try:
@@ -425,7 +508,7 @@ with st.container(key="home_recommendation_row"):
                     """)
             elif recommendations is not None:
                 st.caption(
-                    "Add groceries to your pantry to get started."
+                    "No recipes match this photo yet. Try another photo with more visible ingredients."
                     if mode == "cook_with_what_i_have"
                     else "No recipe suggestions yet. Review your dietary preferences to find your next meal."
                 )
