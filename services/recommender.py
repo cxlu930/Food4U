@@ -42,7 +42,7 @@ WEIGHTS = {
     },
 }
 
-# Used when the user has not set a weekly budget (empty or 0), in CAD.
+# Used when the user has not set a weekly budget (None or ""), in CAD. A saved 0 is a real budget.
 # Based on a 2026 Interac survey: one person in Canada spends about $102 a week on groceries.
 DEFAULT_WEEKLY_BUDGET = 100
 
@@ -132,9 +132,12 @@ def resolve_settings(prefs, spent=0.0):
     """Fill in defaults for budget and spice tolerance.
     Returns (weekly_budget, remaining_budget, max_spice, using_default_budget, using_default_spice)."""
     budget = prefs.get("weekly_budget")
-    using_default_budget = not budget  # None, "" or 0
+    # Only a missing value means "not set". 0 is a valid budget: everything with a price
+    # is then over budget, and the remaining budget can be 0 or negative.
+    using_default_budget = budget is None or budget == ""
     if using_default_budget:
         budget = DEFAULT_WEEKLY_BUDGET
+    budget = float(budget)
     remaining = round(budget - (spent or 0), 2)
 
     max_spice = prefs.get("spice_level")
