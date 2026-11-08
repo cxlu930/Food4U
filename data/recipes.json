@@ -478,5 +478,25 @@
     "time_minutes": 50,
     "estimated_price": 4.0,
     "ingredients": ["chicken", "potato", "carrot", "onion", "garlic", "olive_oil", "salt", "black_pepper"]
+  },
+  {
+    "id": 49,
+    "name": "Bok Choy and Tofu Stir-fry",
+    "cuisine": "chinese",
+    "spice_level": 0,
+    "flavor": "savory",
+    "time_minutes": 15,
+    "estimated_price": 3.0,
+    "ingredients": ["bok_choy", "tofu", "vegetable_oil", "soy_sauce", "salt"]
+  },
+  {
+    "id": 50,
+    "name": "Napa Cabbage Tofu Egg Drop Soup",
+    "cuisine": "chinese",
+    "spice_level": 0,
+    "flavor": "savory",
+    "time_minutes": 20,
+    "estimated_price": 3.0,
+    "ingredients": ["napa_cabbage", "tofu", "egg", "sesame_oil", "salt", "black_pepper"]
   }
 ]
