@@ -37,6 +37,7 @@ def icon(name):
         "allergy": '<circle cx="21" cy="21" r="18"/><path d="m8 8 26 26m0-26L8 34"/>',
         "arrow": '<path d="M7 21h27m-10-10 11 10-11 10"/>',
         "upload": '<path d="M21 29V5M11 15 21 5l10 10M5 27v12h32V27"/>',
+        "budget": '<rect x="4" y="10" width="36" height="27" rx="5"/><path d="M9 10V6h25v4M28 19h12v10H28a5 5 0 0 1 0-10Z"/><circle cx="31" cy="24" r="1"/>',
         "settings": '<circle cx="21" cy="21" r="7"/><path d="m17 3 8 0 1 6 5 3 6-2 4 7-5 4v5l5 4-4 7-6-2-5 3-1 5h-8l-1-5-5-3-6 2-4-7 5-4v-5l-5-4 4-7 6 2 5-3Z"/>',
     }
     return svg_image(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" fill="none" stroke="#111310" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">{paths[name]}</svg>')
@@ -70,7 +71,12 @@ st.markdown("""
 .f4u h2 { font-family:Arial,Helvetica,sans-serif !important; font-weight:800; color:inherit; margin:0; padding:0; font-size:23px; letter-spacing:-.7px; line-height:1.1; }
 .f4u .amount { font-size:43px; font-weight:750; letter-spacing:-1px; line-height:1.15; margin-top:10px; }
 .f4u .stat-note { font-size:11px; color:#657044; margin-top:3px; }
-.f4u .spark { width:150px; height:65px; color:#bedf39; }
+.f4u .stat > div { width: 100%; min-width: 0; }
+.f4u .stat-note { line-height: 1.35; }
+.f4u .daily-empty { color: #7b806a; font-size: 11px; margin-top: 6px; }
+.f4u .budget-usage { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.f4u .budget-track { height: 6px; border-radius: 999px; background: #e7e9db; overflow: hidden; margin-top: 8px; }
+.f4u .budget-fill { height: 100%; border-radius: inherit; background: #B8E33D; }
 .f4u .features { display:grid; grid-template-columns:1.45fr 1fr; gap:28px; }
 .f4u .feature { border:1px solid #dedbd3; border-radius:30px; position:relative; overflow:hidden; min-height:290px; padding:26px 32px; display:flex; align-items:center; }
 .f4u .receipt { background:radial-gradient(ellipse at 65% 55%,#f0f5bb,#f5f7d2); border-color:transparent; }
@@ -83,18 +89,20 @@ st.markdown("""
 .f4u .upload-target { display:flex; align-items:center; gap:16px; padding:10px 15px; border:2px dashed #303521; border-radius:14px; width:100%; font-size:16px; line-height:1.3; }
 .f4u .round-arrow { display:flex; align-items:center; justify-content:center; background:#c9e55b; border-radius:999px; width:64px; height:48px; margin-top:56px; }
 .f4u .round-arrow .icon { width:34px; height:34px; }
-.f4u .preferences { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; margin-top:20px; }
-.f4u .preference { border:1px solid #dedbd3; border-radius:21px; display:flex; align-items:center; gap:20px; min-height:96px; padding:17px 23px; }
+.f4u .preferences { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:16px; margin-top:20px; }
+.f4u .preference { border:1px solid #dedbd3; border-radius:21px; display:flex; align-items:center; gap:10px; height:112px; min-height:112px; padding:16px; }
 .f4u .preference .preference-copy { min-width:0; flex:1; }
-.f4u .preference h2 { font-size:23px; white-space:nowrap; }
-.f4u .preference p { font-size:16px; line-height:1.25; margin:6px 0 0; overflow-wrap:anywhere; }
-.f4u .preference > .icon:last-child { width:27px; height:27px; }
+.f4u .preference h2 { font-size:clamp(17px,1.4vw,20px); white-space:normal; line-height:1.1; }
+.f4u .preference p { font-size:14px; line-height:1.25; margin:6px 0 0; overflow-wrap:anywhere; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.f4u .preference > .icon:first-child { width:32px; height:32px; }
+.f4u .preference > .icon:last-child { width:20px; height:20px; }
 .f4u .recommendation-heading { display:flex; align-items:center; justify-content:space-between; min-height:70px; margin-top:28px; padding:14px 0 8px; }
 .f4u .recommendation-heading h2 { font-size:36px; letter-spacing:-1px; }
 .f4u .recommendation-heading img { width:260px; height:200px; object-fit:contain; transform:rotate(-7deg); }
 .st-key-recommendation_details { border-top:1px solid #dedbd3; padding-top:15px; }
 @media(min-width:1100px) { .f4u .feature { height:290px; } }
 @media(max-width:1100px) {
+ .f4u .preferences { grid-template-columns:repeat(2,minmax(0,1fr)); }
  .f4u .receipt h2 { font-size:40px; } .f4u .pantry h2 { font-size:34px; }
  .f4u .feature { padding:22px; } .f4u .feature p { font-size:16px; }
  .f4u .preference { padding:15px; gap:10px; } .f4u .preference h2 { font-size:20px; }
@@ -105,7 +113,7 @@ st.markdown("""
  .f4u .hero { grid-template-columns:1fr; gap:0; } .f4u .hero-art { height:180px; grid-row:2; }
  .f4u h1 { letter-spacing:-1.5px; } .f4u .intro { font-size:17px; }
  .f4u .stats { gap:12px; } .f4u .stat { padding:16px; min-height:110px; }
- .f4u .stat h2 { font-size:17px; } .f4u .amount { font-size:32px; } .f4u .spark { display:none; }
+ .f4u .stat h2 { font-size:17px; } .f4u .amount { font-size:32px; }
  .f4u .features { grid-template-columns:1fr; gap:16px; }
  .f4u .preferences { grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
  .f4u .preference h2 { white-space:normal; } .f4u .preference > .icon:last-child { display:none; }
@@ -141,21 +149,30 @@ spice = prefs.get("spice_level")
 if spice is None:
     spice = 0
 
-# Decorative motifs match the reference; they do not represent spending history.
-bars = '<svg class="spark" viewBox="0 0 150 65" aria-hidden="true"><path d="M0 64h150" stroke="currentColor"/><g fill="currentColor"><rect x="10" y="48" width="14" height="16" rx="3"/><rect x="39" y="35" width="14" height="29" rx="3"/><rect x="68" y="28" width="14" height="36" rx="3"/><rect x="97" y="17" width="14" height="47" rx="3"/><rect x="126" y="0" width="14" height="64" rx="3"/></g></svg>'
-line = '<svg class="spark" viewBox="0 0 150 65" aria-hidden="true"><path d="M2 60Q24 33 47 40T88 31T126 25L146 12V65H2Z" fill="#ddef9b" opacity=".4"/><path d="M2 60Q24 33 47 40T88 31T126 25T146 12" fill="none" stroke="currentColor" stroke-width="4"/><circle cx="146" cy="12" r="6" fill="currentColor"/></svg>'
-
-bars = svg_image(bars.replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" ').replace('currentColor', '#bedf39'), "spark")
-line = svg_image(line.replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" ').replace('currentColor', '#bedf39'), "spark")
+daily_note = "No saved spending this week." if spent == 0 else "Spent this week · Saved receipts only"
+if budget > 0:
+    used_percent = spent / budget * 100
+    filled_percent = min(max(used_percent, 0.0), 100.0)
+    usage_label = f"{used_percent:.1f}% used"
+    budget_progress = (
+        f'<div class="budget-track" role="progressbar" aria-label="Weekly budget used" '
+        f'aria-valuemin="0" aria-valuemax="100" aria-valuenow="{filled_percent:.2f}" '
+        f'aria-valuetext="{used_percent:.1f}% of budget used">'
+        f'<div class="budget-fill" style="width:{filled_percent:.2f}%"></div></div>'
+    )
+else:
+    usage_label = "No positive budget allocated"
+    budget_progress = ""
 
 preference_cards = ""
 for title, value, glyph in [
+    ("Budget", f"${budget:,.2f} CAD", "budget"),
     ("Cuisines", labels(prefs.get("cuisines")), "cuisine"),
     ("Spice Level", SPICE_LEVELS.get(spice, "Not specified").title(), "spice"),
     ("Flavors", labels(prefs.get("flavor")), "heart"),
     ("Allergies", labels(prefs.get("avoid_tags")), "allergy"),
 ]:
-    preference_cards += f'<a class="preference" href="./Preferences" target="_self" aria-label="Edit {title}">{icon(glyph)}<div class="preference-copy"><h2>{title}</h2><p>{escape(value)}</p></div>{icon("arrow")}</a>'
+    preference_cards += f'<a class="preference" href="./Preferences" target="_self" aria-label="Edit {title}">{icon(glyph)}<div class="preference-copy"><h2>{title}</h2><p title="{escape(value, quote=True)}">{escape(value)}</p></div>{icon("arrow")}</a>'
 
 st.html(f"""
 <div class="f4u">
@@ -165,8 +182,8 @@ st.html(f"""
   <img class="hero-art" src="{artwork('bowl')}" alt="Hand drawn noodle bowl with egg, tomatoes and greens">
  </section>
  <section class="stats" aria-label="Weekly spending overview">
-  <div class="stat"><div><h2>Daily Spending</h2><div class="amount">${spent:,.2f}</div><div class="stat-note">Spent this week · Chart illustrative only</div></div><span title="Decorative illustration, not spending data">{bars}</span></div>
-  <div class="stat"><div><h2>Remaining Budget</h2><div class="amount">${remaining:,.2f}</div><div class="stat-note">Weekly budget: ${budget:,.2f}</div></div><span title="Decorative illustration, not spending data">{line}</span></div>
+  <div class="stat"><div><h2>Daily Spending</h2><div class="amount">${spent:,.2f}</div><div class="stat-note">{daily_note}</div><div class="daily-empty">Daily breakdown unavailable — no daily chart yet.</div></div></div>
+  <div class="stat"><div><h2>Remaining Budget</h2><div class="amount">${remaining:,.2f}</div><div class="stat-note budget-usage"><span>Weekly budget: ${budget:,.2f}</span><span>{usage_label}</span></div>{budget_progress}</div></div>
  </section>
  <section class="features" aria-label="Your kitchen">
   <a class="feature receipt" href="./Receipt" target="_self" aria-label="Upload Receipt: open receipt upload page">
@@ -184,7 +201,7 @@ st.html(f"""
 """)
 
 if remaining < 0:
-    st.warning("You have exceeded your weekly budget.")
+    st.warning(f"You are ${abs(remaining):,.2f} over your weekly budget.")
 
 with st.container(key="recommendation_details"):
     mode_label = st.radio("Find something delicious", ["Plan my meals", "Cook with what I have"], horizontal=True)

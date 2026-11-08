@@ -1,6 +1,6 @@
 import streamlit as st
 
-from db import get_preferences, save_preferences, get_spending_summary
+from db import get_preferences, save_preferences
 from data.ingredients import ALL_TAGS, CUISINES, SPICE_LEVELS, TASTES
 
 st.set_page_config(page_title="Preferences · Food4U", page_icon="🌿", layout="wide")
@@ -24,8 +24,7 @@ body:has(.st-key-preferences_page) [data-testid="stMainBlockContainer"] {
 .st-key-preferences_page [data-testid="stPageLink"] a:focus-visible { outline: 3px solid #6a8e15; outline-offset: 4px; }
 .st-key-preferences_page [data-testid="stForm"] { border: 0; padding: 0; }
 .st-key-pref_budget, .st-key-pref_cuisines, .st-key-pref_spice,
-.st-key-pref_flavors, .st-key-pref_allergies,
-.st-key-budget_metric, .st-key-spent_metric, .st-key-remaining_metric {
+.st-key-pref_flavors, .st-key-pref_allergies {
  background: #fdf9f2; border: 1px solid #dedbd3 !important;
  border-radius: 24px !important; padding: 24px !important;
 }
@@ -77,8 +76,6 @@ body:has(.st-key-preferences_page) [data-testid="stMainBlockContainer"] {
 }
 .st-key-preferences_page [data-testid="stFormSubmitButton"] button:hover { background: #bedb49; color: #111310; border-color: #8fae2f; }
 .st-key-preferences_page [data-testid="stFormSubmitButton"] button:focus-visible { outline: 3px solid #6a8e15; outline-offset: 3px; }
-.st-key-preferences_page [data-testid="stMetricValue"] { color: #111310; font-family: Arial, sans-serif; font-size: clamp(26px, 3vw, 42px); font-weight: 750; }
-.st-key-remaining_metric { background: #f0f5cf; }
 @media (max-width: 760px) {
  body:has(.st-key-preferences_page) [data-testid="stMainBlockContainer"] { padding: 18px; }
  .st-key-preferences_page h1 { letter-spacing: -1.5px; }
@@ -193,19 +190,3 @@ with st.container(key="preferences_page"):
             "avoid_tags": avoid_tags,
         })
         st.success("Preferences saved. Your weekly budget is up to date.")
-
-    st.subheader("Your week, at a glance.")
-    st.caption("Monday–Sunday · Spending includes only receipts saved to the database. Unsaved form edits do not change these totals.")
-    summary = get_spending_summary()
-    budget_col, spent_col, remaining_col = st.columns(3, gap="medium")
-    for column, key, title, value in [
-        (budget_col, "budget_metric", "Budget", summary["budget"]),
-        (spent_col, "spent_metric", "Spent", summary["spent"]),
-        (remaining_col, "remaining_metric", "Remaining", summary["remaining"]),
-    ]:
-        with column:
-            with st.container(border=True, key=key):
-                st.metric(title, f"${value:,.2f}")
-
-    if summary["remaining"] < 0:
-        st.warning(f"You are ${abs(summary['remaining']):,.2f} over your weekly budget.")
