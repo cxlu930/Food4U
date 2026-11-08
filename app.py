@@ -74,6 +74,13 @@ st.markdown("""
 .f4u .stat > div { width: 100%; min-width: 0; }
 .f4u .stat-note { line-height: 1.35; }
 .f4u .daily-empty { color: #7b806a; font-size: 11px; margin-top: 6px; }
+.f4u .remaining-card { position: relative; cursor: pointer; transition: border-color .15s, box-shadow .15s; }
+.f4u .remaining-card:hover { border-color: #B8E33D; box-shadow: 0 3px 12px #526b2e12; }
+.f4u .remaining-card .stat-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.f4u .remaining-card .stat-heading .icon { width: 22px; height: 22px; }
+.f4u .remaining-card.is-over-budget { border-color: #c79846; }
+.f4u .remaining-card.is-over-budget:hover { border-color: #B8E33D; }
+.f4u .budget-warning { color: #805313; font-size: 11px; margin-top: 5px; }
 .f4u .budget-usage { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .f4u .budget-track { height: 6px; border-radius: 999px; background: #e7e9db; overflow: hidden; margin-top: 8px; }
 .f4u .budget-fill { height: 100%; border-radius: inherit; background: #B8E33D; }
@@ -153,7 +160,7 @@ daily_note = "No saved spending this week." if spent == 0 else "Spent this week 
 if budget > 0:
     used_percent = spent / budget * 100
     filled_percent = min(max(used_percent, 0.0), 100.0)
-    usage_label = f"{used_percent:.1f}% used"
+    usage_label = f"Budget Used: {used_percent:.1f}% used"
     budget_progress = (
         f'<div class="budget-track" role="progressbar" aria-label="Weekly budget used" '
         f'aria-valuemin="0" aria-valuemax="100" aria-valuenow="{filled_percent:.2f}" '
@@ -161,8 +168,16 @@ if budget > 0:
         f'<div class="budget-fill" style="width:{filled_percent:.2f}%"></div></div>'
     )
 else:
-    usage_label = "No positive budget allocated"
-    budget_progress = ""
+    usage_label = "Budget Used: — (zero budget)"
+    budget_progress = (
+        '<div class="budget-track" role="img" '
+        'aria-label="Budget usage unavailable: No positive budget allocated"></div>'
+    )
+
+budget_warning = (
+    f'<div class="budget-warning">Over budget by ${abs(remaining):,.2f}</div>'
+    if remaining < 0 else ""
+)
 
 preference_cards = ""
 for title, value, glyph in [
@@ -183,7 +198,7 @@ st.html(f"""
  </section>
  <section class="stats" aria-label="Weekly spending overview">
   <div class="stat"><div><h2>Daily Spending</h2><div class="amount">${spent:,.2f}</div><div class="stat-note">{daily_note}</div><div class="daily-empty">Daily breakdown unavailable — no daily chart yet.</div></div></div>
-  <div class="stat"><div><h2>Remaining Budget</h2><div class="amount">${remaining:,.2f}</div><div class="stat-note budget-usage"><span>Weekly budget: ${budget:,.2f}</span><span>{usage_label}</span></div>{budget_progress}</div></div>
+  <a class="stat remaining-card{' is-over-budget' if remaining < 0 else ''}" href="./Preferences" target="_self" aria-label="Remaining Budget: edit budget in Preferences"><div><div class="stat-heading"><h2>Remaining Budget</h2>{icon('arrow')}</div><div class="amount">${remaining:,.2f}</div><div class="stat-note budget-usage"><span>Weekly budget: ${budget:,.2f}</span><span>{usage_label}</span></div>{budget_progress}{budget_warning}</div></a>
  </section>
  <section class="features" aria-label="Your kitchen">
   <a class="feature receipt" href="./Receipt" target="_self" aria-label="Upload Receipt: open receipt upload page">
