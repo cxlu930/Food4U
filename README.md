@@ -11,12 +11,14 @@ Built for students living independently, Food4U brings personalized recipes, rec
 ## What it does
 
 - **Personal preferences.** Set your grocery budget, favourite cuisines, spice level, tastes, allergies and dietary needs.
-- **Recipe recommendations.** Plan your meals or cook with what you already have. Discover recipes that match your preferences, respect your dietary restrictions, and show what you still need to buy.
+- **Recipe recommendations.** Plan your meals or cook with what you already have. Discover recipes that match your preferences, respect your dietary restrictions, and show what you still need to buy. Every recipe comes with simple step-by-step cooking instructions.
 - **Receipt scanning.** Upload a grocery receipt photo. AI reads the items, prices, store and date. You review the results before anything is saved.
+- **Fridge scanner.** Snap a photo of your fridge and AI spots the ingredients, so you can see what you can cook right now.
 - **Smart pantry.** Confirmed purchases go into your pantry. Update quantities or mark ingredients as used up.
 - **Use-first reminders.** Ingredients approaching their reference dates are highlighted and prioritized in recommendations.
-- **Budget tracking.** Track grocery spending and see how much of your budget remains.
+- **Budget tracking.** Choose a weekly or monthly budget, track grocery spending, and see how much remains in your Budget Summary.
 - **Favorites.** Save recipes you love and find them again anytime.
+- **Your own space.** Pick a nickname (no password needed) and your preferences, pantry and favorites stay yours.
 
 ## How it works
 
@@ -49,7 +51,7 @@ Then open [http://localhost:8501](http://localhost:8501).
 
 The database (`food4u.db`) is created automatically on the first run.
 
-Receipt scanning requires a Gemini API key. Create a `.env` file in the project folder:
+Receipt and fridge scanning require a Gemini API key. Create a `.env` file in the project folder:
 
 ```env
 GEMINI_API_KEY=your-key
@@ -62,9 +64,9 @@ The rest of the app works without it.
 ```text
 app.py                  Home page
 db.py                   Database tables and data functions
-pages/                  Preferences, Recipes, Receipt, Pantry
-services/               Recommendation and receipt-reading logic
-data/                   Ingredient list and recipes
+pages/                  Preferences, Recipes, Receipt, Pantry, Fridge, Summary
+services/               Recommendation, receipt and fridge reading logic
+data/                   Ingredient list, recipes and cooking steps
 docs/                   Documentation
 ```
 
