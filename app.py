@@ -1,11 +1,12 @@
 import base64
+import json
 from html import escape
 from pathlib import Path
 from urllib.parse import quote
 
 import streamlit as st
 
-from data.ingredients import SPICE_LEVELS
+from data.ingredients import INGREDIENTS, SPICE_LEVELS
 from db import current_user, get_preferences, get_budget_summary, init_db, save_preferences, sign_out
 from services.recommender import get_recommendations, load_recipes
 
@@ -173,6 +174,10 @@ st.markdown("""
 .st-key-recommendation_details [role="radiogroup"] { gap:10px; }
 .st-key-recommendation_details [role="radiogroup"] label { border:1px solid #dedbd3; border-radius:22px; padding:7px 13px; background:#fdf9f2; }
 .st-key-recommendation_details [role="radiogroup"] label:has(input:checked) { background:#eaf1cb; border-color:#b8d44f; }
+.st-key-recommendation_details [data-testid="stExpander"] {
+ border:1px solid #dedbd3; border-radius:14px; background:#f5f5df;
+}
+.st-key-recommendation_details [data-testid="stExpander"] summary { padding:12px 14px; }
 @media(max-width:760px) { .f4u .recipe-top { align-items:flex-start; flex-direction:column; } .f4u .recipe-result { padding:20px; } }
 
 .st-key-home_budget_cards { margin:8px 0 24px; }
@@ -336,22 +341,43 @@ with st.container(key="home_recommendation_row"):
                 st.info("Recipe ideas are temporarily unavailable. Please try again later.")
             results = recommendations.get("results", []) if recommendations is not None else []
             if results:
-                result = results[0]
-                recipe = result["recipe"]
-                reasons = "".join(f"<li>{escape(reason)}</li>" for reason in result.get("reasons", []))
-                warnings = "".join(f'<p class="recipe-warning">{escape(warning)}</p>' for warning in result.get("warnings", []))
-                missing = result.get("missing_ingredients", [])
-                shopping = "Shopping list: " + labels(missing) if missing else "Your pantry has all the listed ingredients."
-                st.html(f"""
-                <div class="f4u"><article class="recipe-result">
-                  <div class="recipe-top"><div><span class="eyebrow">PICKED FOR YOUR KITCHEN</span>
-                  <h2>{escape(recipe['name'])}</h2>
-                  <p class="recipe-meta">{escape(labels([recipe['cuisine']]))} · {recipe['time_minutes']} min · Estimated ${recipe['estimated_price']:.2f} per serving</p></div>
-                  <a class="recipe-open" href="./Recipes{nick_q}" target="_self">View recipe {icon('arrow')}</a></div>
-                  {f'<ul class="recipe-reasons">{reasons}</ul>' if reasons else ''}
-                  {warnings}<p class="recipe-shopping">{escape(shopping)}</p>
-                </article></div>
-                """)
+                try:
+                    with (Path(__file__).parent / "data" / "recipe_steps.json").open(encoding="utf-8") as steps_file:
+                        recipe_steps = json.load(steps_file)
+                except (OSError, ValueError):
+                    recipe_steps = {}
+                for rank, result in enumerate(results[:3], start=1):
+                    recipe = result["recipe"]
+                    with st.expander(f"{rank}. {recipe['name']}"):
+                        st.caption(
+                            f"{labels([recipe['cuisine']])} · {recipe['time_minutes']} min · "
+                            f"Estimated ${recipe['estimated_price']:.2f} per serving"
+                        )
+                        for reason in result.get("reasons", []):
+                            st.write(reason)
+                        for warning in result.get("warnings", []):
+                            st.warning(warning)
+                        st.markdown("**Ingredients**")
+                        for ingredient in recipe.get("ingredients", []):
+                            st.write("• " + INGREDIENTS.get(ingredient, {}).get(
+                                "display_name", ingredient.replace("_", " ").title()
+                            ))
+                        st.markdown("**Missing ingredients**")
+                        missing = result.get("missing_ingredients", [])
+                        if missing:
+                            for ingredient in missing:
+                                st.write("• " + INGREDIENTS.get(ingredient, {}).get(
+                                    "display_name", ingredient.replace("_", " ").title()
+                                ))
+                        else:
+                            st.write("Your pantry has all the listed ingredients.")
+                        st.markdown("**Cooking instructions**")
+                        steps = recipe_steps.get(str(recipe["id"]), [])
+                        if steps:
+                            for number, step in enumerate(steps, start=1):
+                                st.write(f"{number}. {step['text']}")
+                        else:
+                            st.info("Cooking instructions are not available for this recipe yet.")
             else:
                 st.info("No recipe suggestions yet. Add pantry items or review your dietary preferences to find your next meal.")
             if not results:
