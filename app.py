@@ -423,7 +423,7 @@ with st.container(key="home_budget_cards"):
         with st.container(height="stretch", key="home_remaining_budget"):
             st.html(f"""
 <div class="f4u">
-  <a class="stat remaining-card{' is-over-budget' if remaining < 0 else ''}" href="./Preferences{nick_q}" target="_self" aria-label="Remaining Budget: edit budget in Preferences"><div><div class="stat-heading"><h2>Remaining Budget</h2>{icon('arrow')}</div><div class="amount">${remaining:,.2f}</div><div class="stat-note budget-usage"><span>{period_label} budget: ${budget:,.2f}</span><span>{usage_label}</span></div>{budget_progress}{budget_warning}</div></a>
+  <a class="stat remaining-card{' is-over-budget' if remaining < 0 else ''}" href="./Summary{nick_q}" target="_self" aria-label="Remaining Budget: open Budget Summary"><div><div class="stat-heading"><h2>Remaining Budget</h2>{icon('arrow')}</div><div class="amount">${remaining:,.2f}</div><div class="stat-note budget-usage"><span>{period_label} budget: ${budget:,.2f}</span><span>{usage_label}</span></div>{budget_progress}{budget_warning}</div></a>
 </div>
 """)
 
