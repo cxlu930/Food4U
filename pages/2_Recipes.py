@@ -104,7 +104,7 @@ def spice_text(level):
     return "🌶️" * level if level else "Not spicy"
 
 
-def render_card(result, favorites):
+def render_card(result, favorites, mode):
     recipe = result["recipe"]
     cuisine = recipe.get("cuisine", "")
     emoji = CUISINE_EMOJI.get(cuisine, "🍽️")
@@ -134,9 +134,9 @@ def render_card(result, favorites):
             )
 
             missing = result["missing_ingredients"]
-            if missing:
+            if missing and mode != MODE_COOK:
                 st.markdown("**Need to buy:** " + ", ".join(ingredient_label(n) for n in missing))
-            else:
+            elif not missing:
                 st.markdown("✅ You have everything you need")
 
             if result.get("reasons"):
@@ -204,6 +204,12 @@ with st.container(key="recipes_page"):
 
     if not filtered_results and selected_cuisine == "favorites":
         st.info("No favorites to show yet. Tap the heart on a recipe to save it.")
+    elif not results and mode == MODE_COOK:
+        st.info(
+            "Nothing you can cook with your current pantry. Try Plan My Meals to see "
+            "what to buy, or add ingredients in Pantry."
+        )
+        st.page_link("pages/4_Pantry.py", label="Go to Pantry", icon="🧺")
     elif not filtered_results:
         if results:
             st.info(
@@ -223,4 +229,4 @@ with st.container(key="recipes_page"):
             columns = st.columns(2, gap="medium")
             for column, result in zip(columns, filtered_results[start:start + 2]):
                 with column:
-                    render_card(result, favorites)
+                    render_card(result, favorites, mode)
