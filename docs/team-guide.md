@@ -24,7 +24,8 @@ Pages call these functions from `db.py`. They do not write SQL.
 | `get_pantry_items()` | Pantry items with `days_left` and `status` (`fresh`, `use_first`, `check_item`) |
 | `update_pantry_quantity(item_id, quantity)` | Change a quantity. 0 means used up |
 | `save_confirmed_receipt(receipt, items)` | Save a confirmed receipt and add recognized items to the pantry. Returns `False` if the same receipt was already saved |
-| `get_spending_summary()` | `budget`, `spent` (this week), `remaining` |
+| `get_budget_summary(period=None)` | Budget, spent, remaining, dates and `plan_budget` for the period the user chose (weekly or monthly). Dates follow the Vancouver calendar |
+| `get_spending_summary()` | The **weekly** `budget`, `spent`, `remaining`. Kept for older code; new code should use `get_budget_summary()` |
 | `add_favorite(recipe_id)` / `remove_favorite(recipe_id)` | Save or remove a favorite recipe (`recipe_id` is the `id` in `recipes.json`) |
 | `get_favorites()` | `recipe_id` of every favorite, most recently saved first |
 

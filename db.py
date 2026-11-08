@@ -2,6 +2,8 @@ import os
 import re
 import sqlite3
 from datetime import date, datetime, timedelta
+from math import ceil
+from zoneinfo import ZoneInfo
 
 import streamlit as st
 
@@ -11,6 +13,21 @@ DB_PATH = "food4u.db"
 
 # Demo only: fill an empty pantry with sample items. Set to False to turn it off.
 SEED_SAMPLE_DATA = False
+
+# Budget. The weekly and monthly amounts are saved separately. The monthly default is its own
+# number, NOT weekly x 4. A budget the user saved as 0 is kept as 0.
+DEFAULT_WEEKLY_BUDGET = 100.0
+DEFAULT_MONTHLY_BUDGET = 400.0
+BUDGET_PERIODS = ("weekly", "monthly")
+
+
+def today_vancouver():
+    """Today's date in Vancouver. The server may run in another time zone (Streamlit Cloud uses UTC),
+    and weeks and months must start on the Vancouver calendar."""
+    try:
+        return datetime.now(ZoneInfo("America/Vancouver")).date()
+    except Exception:  # no time zone data installed: fall back to the server's date
+        return date.today()
 
 
 _schema_ready = False
@@ -98,9 +115,19 @@ def _migrate_to_users(conn):
             conn.execute(f"ALTER TABLE {table} ADD COLUMN user_id TEXT NOT NULL DEFAULT 'guest'")
 
 
+def _add_budget_columns(conn):
+    """Databases from before the monthly budget get the two new columns. Nothing is lost."""
+    cols = [row[1] for row in conn.execute("PRAGMA table_info(UserPreferences)")]
+    if cols and "budget_period" not in cols:
+        conn.execute("ALTER TABLE UserPreferences ADD COLUMN budget_period TEXT NOT NULL DEFAULT 'weekly'")
+    if cols and "monthly_budget" not in cols:
+        conn.execute("ALTER TABLE UserPreferences ADD COLUMN monthly_budget REAL")  # NULL = never set
+
+
 def init_db():
     conn = sqlite3.connect(DB_PATH)  # not get_connection(): that calls init_db()
     _migrate_to_users(conn)
+    _add_budget_columns(conn)
     conn.executescript(
         """
         -- One row per visitor (their nickname).
@@ -110,7 +137,9 @@ def init_db():
             cuisines TEXT,               -- comma-separated, e.g. "chinese,japanese"
             spice_level INTEGER,         -- 0 none, 1 mild, 2 medium, 3 hot
             flavor TEXT,                 -- comma-separated TASTES, e.g. "savory,sour"; empty = no preference
-            avoid_tags TEXT              -- comma-separated allergy / diet tags
+            avoid_tags TEXT,             -- comma-separated allergy / diet tags
+            budget_period TEXT NOT NULL DEFAULT 'weekly',   -- 'weekly' or 'monthly'
+            monthly_budget REAL          -- NULL = never set (the default is used)
         );
 
         CREATE TABLE IF NOT EXISTS Recipes (
@@ -184,7 +213,7 @@ def _seed_sample_data(conn):
         ("spinach", 200, "g", 5, 0),
         ("milk", 1, "L", 9, -2),
     ]
-    today = date.today()
+    today = today_vancouver()
     rows = [
         (
             name,
@@ -211,24 +240,28 @@ def get_preferences(user_id=None):
     uid = _uid(user_id)
     conn = get_connection()
     row = conn.execute(
-        "SELECT weekly_budget, cuisines, spice_level, flavor, avoid_tags "
+        "SELECT weekly_budget, cuisines, spice_level, flavor, avoid_tags, budget_period, monthly_budget "
         "FROM UserPreferences WHERE user_id = ?",
         (uid,),
     ).fetchone()
     conn.close()
 
-    if row is None:  # never saved: default 100 CAD, spice 0. A saved 0 is read as it is.
+    if row is None:  # never saved: default 100 CAD a week, 400 a month, spice 0. A saved 0 stays 0.
         return {
-            "weekly_budget": 100.0,
+            "weekly_budget": DEFAULT_WEEKLY_BUDGET,
+            "monthly_budget": DEFAULT_MONTHLY_BUDGET,
+            "budget_period": "weekly",
             "cuisines": [],
             "spice_level": 0,
             "flavor": [],
             "avoid_tags": [],
         }
 
-    weekly_budget, cuisines, spice_level, flavor, avoid_tags = row
+    weekly_budget, cuisines, spice_level, flavor, avoid_tags, budget_period, monthly_budget = row
     return {
         "weekly_budget": weekly_budget,
+        "monthly_budget": DEFAULT_MONTHLY_BUDGET if monthly_budget is None else monthly_budget,
+        "budget_period": budget_period if budget_period in BUDGET_PERIODS else "weekly",
         "cuisines": [c for c in (cuisines or "").split(",") if c],
         "spice_level": spice_level,
         "flavor": [f for f in (flavor or "").split(",") if f and f != "no_preference"],
@@ -243,18 +276,36 @@ def save_preferences(prefs, user_id=None):
         flavor = flavor.split(",")
 
     conn = get_connection()
+    # Older pages do not send budget_period / monthly_budget: whatever is left out keeps its saved
+    # value (a page that only saves the weekly budget must not wipe the monthly one).
+    old = conn.execute(
+        "SELECT weekly_budget, budget_period, monthly_budget FROM UserPreferences WHERE user_id = ?",
+        (uid,),
+    ).fetchone() or (None, "weekly", None)
+    old_weekly, old_period, old_monthly = old
+    weekly = prefs["weekly_budget"] if "weekly_budget" in prefs else (
+        DEFAULT_WEEKLY_BUDGET if old_weekly is None else old_weekly
+    )
+    monthly = prefs["monthly_budget"] if "monthly_budget" in prefs else old_monthly  # None = never set
+    period = prefs.get("budget_period", old_period)
+    if period not in BUDGET_PERIODS:
+        conn.close()
+        raise ValueError(f"budget_period must be one of {BUDGET_PERIODS}, not {period!r}")
+
     # INSERT OR REPLACE overwrites this visitor's row (user_id is the primary key).
     conn.execute(
         "INSERT OR REPLACE INTO UserPreferences "
-        "(user_id, weekly_budget, cuisines, spice_level, flavor, avoid_tags) "
-        "VALUES (?, ?, ?, ?, ?, ?)",
+        "(user_id, weekly_budget, cuisines, spice_level, flavor, avoid_tags, budget_period, monthly_budget) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
         (
             uid,
-            prefs["weekly_budget"],
+            weekly,
             ",".join(prefs["cuisines"]),
             prefs["spice_level"],
             ",".join(f for f in flavor if f and f != "no_preference"),
             ",".join(prefs["avoid_tags"]),
+            period,
+            monthly,
         ),
     )
     conn.commit()
@@ -276,7 +327,7 @@ def get_pantry_items(user_id=None):
     items = []
     for id_, name, quantity, unit, purchase_date, expiry_date, receipt_id in rows:
         if expiry_date:
-            days_left = (date.fromisoformat(expiry_date) - date.today()).days
+            days_left = (date.fromisoformat(expiry_date) - today_vancouver()).days
             if days_left > 2:
                 status = "fresh"
             elif days_left >= 1:
@@ -366,23 +417,62 @@ def update_pantry_quantity(item_id, quantity, user_id=None):
     conn.close()
 
 
-def get_spending_summary(user_id=None):
-    uid = _uid(user_id)
-    budget = get_preferences(uid)["weekly_budget"]
+def _period_range(period, today):
+    """First and last day of the week (Monday to Sunday) or of the calendar month containing today."""
+    if period == "monthly":
+        start = today.replace(day=1)
+        next_month = (start.replace(day=28) + timedelta(days=4)).replace(day=1)
+        return start, next_month - timedelta(days=1)
+    start = today - timedelta(days=today.weekday())
+    return start, start + timedelta(days=6)
 
-    today = date.today()
-    monday = today - timedelta(days=today.weekday())
-    sunday = monday + timedelta(days=6)
+
+def get_budget_summary(period=None, user_id=None):
+    """Budget, spending and what is left for a period. `period` is 'weekly' or 'monthly'; leave it out
+    to use the one the user chose. Spending is the total of the receipts the user confirmed whose
+    purchase date falls in the period (Vancouver calendar): it is never weekly spending x 4.
+
+    Returns: period, budget, spent, remaining, start_date, end_date (YYYY-MM-DD), days_left (counting
+    today) and plan_budget: what one week of meal planning may cost. Weekly: the remaining budget.
+    Monthly: the remaining budget divided by the weeks left in the month (at least 1)."""
+    uid = _uid(user_id)
+    prefs = get_preferences(uid)
+    period = period or prefs["budget_period"]
+    if period not in BUDGET_PERIODS:
+        raise ValueError(f"period must be one of {BUDGET_PERIODS}, not {period!r}")
+    budget = prefs["monthly_budget"] if period == "monthly" else prefs["weekly_budget"]
+
+    today = today_vancouver()
+    start, end = _period_range(period, today)
 
     conn = get_connection()
     spent = conn.execute(
         "SELECT COALESCE(SUM(total_price), 0) FROM Receipts "
         "WHERE user_id = ? AND purchase_date BETWEEN ? AND ?",
-        (uid, monday.isoformat(), sunday.isoformat()),
+        (uid, start.isoformat(), end.isoformat()),
     ).fetchone()[0]
     conn.close()
 
-    return {"budget": budget, "spent": round(spent, 2), "remaining": round(budget - spent, 2)}
+    remaining = round(budget - spent, 2)
+    days_left = (end - today).days + 1
+    weeks_left = max(1, ceil(days_left / 7))
+    return {
+        "period": period,
+        "budget": budget,
+        "spent": round(spent, 2),
+        "remaining": remaining,
+        "start_date": start.isoformat(),
+        "end_date": end.isoformat(),
+        "days_left": days_left,
+        "plan_budget": remaining if period == "weekly" else round(remaining / weeks_left, 2),
+    }
+
+
+def get_spending_summary(user_id=None):
+    """The WEEKLY summary, kept for code written before the monthly budget (Home, the recommender).
+    budget, spent and remaining are unchanged; the other keys are new. For the period the user
+    chose, use get_budget_summary()."""
+    return get_budget_summary("weekly", user_id)
 
 
 def add_favorite(recipe_id, user_id=None):
