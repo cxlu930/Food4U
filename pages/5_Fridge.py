@@ -7,12 +7,15 @@ import streamlit as st
 from PIL import Image, UnidentifiedImageError
 
 from data.ingredients import INGREDIENTS
+from db import require_user
 from services.fridge_parser import scan_fridge
 from services.recommender import (
     MODE_COOK,
     load_recipes,
     recommend,
 )
+
+require_user()  # know who this is from the first moment, so "Back to Home" keeps the nickname
 
 st.page_link("app.py", label="← Back to Home")
 
