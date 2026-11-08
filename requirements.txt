@@ -1,3 +1,5 @@
 streamlit
 requests
 pillow
+google-genai
+python-dotenv
