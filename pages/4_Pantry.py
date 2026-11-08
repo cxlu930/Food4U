@@ -2,6 +2,7 @@ import html
 
 import streamlit as st
 
+from data.ingredient_emoji import ingredient_emoji
 from data.ingredients import INGREDIENTS
 from db import get_pantry_items, init_db, update_pantry_quantity
 
@@ -74,44 +75,13 @@ SECTIONS = [
     ("fresh", "Fresh", None),
 ]
 
-CATEGORY_EMOJI = {
-    "vegetable": "🥬", "fruit": "🍎", "meat": "🍗", "seafood": "🐟", "egg": "🥚",
-    "protein": "🫘", "dairy": "🧀", "grain": "🌾", "legume": "🫘", "canned": "🥫",
-    "condiment": "🧂", "spice": "🌶️", "oil": "🫒", "nut": "🥜", "sweet": "🍫", "sweets": "🍫",
-}
-
-INGREDIENT_EMOJI = {
-    "tomato": "🍅", "onion": "🧅", "garlic": "🧄", "ginger": "🫚", "green_onion": "🌱", "potato": "🥔",
-    "carrot": "🥕", "bell_pepper": "🫑", "broccoli": "🥦", "lettuce": "🥬", "bean_sprouts": "🌱",
-    "cilantro": "🌿", "spinach": "🥬", "mushroom": "🍄", "cucumber": "🥒", "napa_cabbage": "🥬",
-    "cabbage": "🥬", "bok_choy": "🥬",
-    "lemon": "🍋", "lime": "🍋", "banana": "🍌", "avocado": "🥑",
-    "chicken": "🍗", "ground_beef": "🥩", "ground_pork": "🥩", "beef": "🥩", "pork_ribs": "🍖", "bacon": "🥓",
-    "salmon": "🐟", "shrimp": "🦐", "egg": "🥚", "tofu": "🫘",
-    "milk": "🥛", "butter": "🧈", "cheese": "🧀", "parmesan": "🧀", "yogurt": "🥣", "cream": "🥛", "paneer": "🧀",
-    "rice": "🍚", "pasta": "🍝", "rice_noodles": "🍜", "bread": "🍞", "burger_bun": "🍔", "flour": "🌾",
-    "oats": "🥣", "corn_tortilla": "🌮", "flour_tortilla": "🫓", "naan": "🫓", "rice_paper": "🍘",
-    "red_lentils": "🫘", "kidney_beans": "🫘", "canned_tomato": "🥫",
-    "soy_sauce": "🍶", "fish_sauce": "🍶", "miso": "🥣", "doubanjiang": "🌶️", "gochujang": "🌶️",
-    "kimchi": "🥬", "sesame_oil": "🫙", "sesame_seeds": "🌰", "dashi": "🍲", "curry_roux": "🍛",
-    "mayonnaise": "🫙", "ketchup": "🥫", "caesar_dressing": "🥗", "maple_syrup": "🍁",
-    "salt": "🧂", "sugar": "🍬", "black_pepper": "🧂", "curry_powder": "🍛", "garam_masala": "🌶️",
-    "turmeric": "🧂", "chili_powder": "🌶️", "baking_powder": "🧁", "baking_soda": "🧁",
-    "vegetable_oil": "🫙", "olive_oil": "🫒", "peanut": "🥜", "cashew": "🥜",
-    "dark_chocolate": "🍫", "chocolate_chips": "🍫", "chocolate_truffles": "🍫", "marshmallow": "🍡",
-}
-
-
 def display_name(item):
     info = INGREDIENTS.get(item["ingredient_name"], {})
     return info.get("display_name", item["ingredient_name"])
 
 
 def emoji_for(item):
-    key = item["ingredient_name"]
-    if key in INGREDIENT_EMOJI:
-        return INGREDIENT_EMOJI[key]
-    return CATEGORY_EMOJI.get(INGREDIENTS.get(key, {}).get("category"), "🍽️")
+    return ingredient_emoji(item["ingredient_name"])
 
 
 def days_text(days_left):
