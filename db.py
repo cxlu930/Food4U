@@ -119,9 +119,9 @@ def get_preferences():
     ).fetchone()
     conn.close()
 
-    if row is None:
+    if row is None:  # never saved: default 100 CAD, spice 0. A saved 0 is read as it is.
         return {
-            "weekly_budget": 0.0,
+            "weekly_budget": 100.0,
             "cuisines": [],
             "spice_level": 0,
             "flavor": [],
