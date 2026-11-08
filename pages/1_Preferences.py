@@ -97,6 +97,8 @@ body:has(.st-key-preferences_page) [data-testid="stMainBlockContainer"] {
  background: transparent !important;
 }
 .st-key-pref_spice [data-testid="stSliderTickBar"] { color: #687347; }
+.st-key-preferences_page [role="radiogroup"] label { border:1px solid #dedbd3; border-radius:999px; padding:7px 15px; }
+.st-key-preferences_page [role="radiogroup"] label:has(input:checked) { background:#D5E69B; border-color:#9DBD43; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -115,6 +117,7 @@ def saved_options(value, options):
 
 saved_prefs = get_preferences()
 saved_budget = float(saved_prefs["weekly_budget"])
+saved_monthly_budget = float(saved_prefs["monthly_budget"])
 saved_spice = saved_prefs["spice_level"]
 if saved_spice not in SPICE_LEVELS:
     saved_spice = 0
@@ -125,14 +128,34 @@ with st.container(key="preferences_page"):
     st.title("Make it yours.")
     st.write("Your budget, your favorite flavors, and the things that matter at your table.")
 
+    budget_period = st.radio(
+        "Budget period", ["weekly", "monthly"],
+        index=["weekly", "monthly"].index(saved_prefs["budget_period"]),
+        format_func=str.title, horizontal=True,
+        key="preferences_budget_period",
+    )
+    hidden_budget = "monthly" if budget_period == "weekly" else "weekly"
+    st.markdown(
+        f"<style>.st-key-pref_{hidden_budget}_amount {{ display: none; }}</style>",
+        unsafe_allow_html=True,
+    )
+
     with st.form("preferences_form", border=False, enter_to_submit=False):
         with st.container(border=True, key="pref_budget"):
-            st.subheader("Weekly Budget")
-            weekly_budget = st.number_input(
-                "Weekly Budget (CAD)", min_value=0.0,
-                value=saved_budget, step=0.01, format="%.2f",
-                label_visibility="collapsed", key="weekly_budget_inline",
-            )
+            st.subheader(f"{budget_period.title()} Budget")
+            with st.container(key="pref_weekly_amount"):
+                weekly_budget = st.number_input(
+                    "Weekly Budget (CAD)", min_value=0.0,
+                    value=saved_budget, step=0.01, format="%.2f",
+                    label_visibility="collapsed", key="weekly_budget_inline",
+                )
+            with st.container(key="pref_monthly_amount"):
+                monthly_budget = st.number_input(
+                    "Monthly Budget (CAD)", min_value=0.0,
+                    value=saved_monthly_budget, step=0.01, format="%.2f",
+                    label_visibility="collapsed", key="monthly_budget_inline",
+                )
+            st.caption("Weekly and monthly budgets are saved separately in CAD. Switching does not convert the amounts.")
 
             with st.container(key="budget_hint"):
                 st.markdown("Click amount to edit")
@@ -184,9 +207,11 @@ with st.container(key="preferences_page"):
     if submitted:
         save_preferences({
             "weekly_budget": float(weekly_budget),
+            "monthly_budget": float(monthly_budget),
+            "budget_period": budget_period,
             "cuisines": cuisines,
             "spice_level": int(spice_level),
             "flavor": flavors,
             "avoid_tags": avoid_tags,
         })
-        st.success("Preferences saved. Your weekly budget is up to date.")
+        st.success(f"Preferences saved. Your default budget period is now {budget_period}.")

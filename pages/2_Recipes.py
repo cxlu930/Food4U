@@ -1,5 +1,9 @@
+import json
+from pathlib import Path
+
 import streamlit as st
 
+from data.ingredient_emoji import ingredient_emoji
 from data.ingredients import CUISINES, INGREDIENTS
 from db import add_favorite, get_favorites, init_db, remove_favorite
 from services.recommender import MODE_COOK, MODE_PLAN, get_recommendations
@@ -104,6 +108,16 @@ def spice_text(level):
     return "🌶️" * level if level else "Not spicy"
 
 
+@st.cache_data
+def load_steps():
+    """How to cook each recipe (data/recipe_steps.json), keyed by the recipe id as text."""
+    path = Path(__file__).resolve().parent.parent / "data" / "recipe_steps.json"
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}  # no steps file: the cards simply have no "How to cook"
+
+
 def render_card(result, favorites, mode=None):
     """Draw one recipe card with a favorite heart.
     `mode` is the recommendation mode; leave it None where there is no mode
@@ -136,7 +150,6 @@ def render_card(result, favorites, mode=None):
                 f"Taste: {str(recipe.get('flavor', '')).title()}"
             )
 
-            # Cook mode never shows a shopping list (it only returns recipes with nothing missing).
             missing = result["missing_ingredients"]
             if missing and mode != MODE_COOK:
                 st.markdown("**Need to buy:** " + ", ".join(ingredient_label(n) for n in missing))
@@ -147,6 +160,13 @@ def render_card(result, favorites, mode=None):
                 with st.expander("Why this recipe?"):
                     for reason in result["reasons"]:
                         st.text(reason)
+
+            steps = load_steps().get(str(recipe["id"]))
+            if steps:
+                with st.expander("How to cook"):
+                    for number, step in enumerate(steps, 1):
+                        icons = " ".join(dict.fromkeys(ingredient_emoji(k) for k in step["ingredients"][:4]))
+                        st.markdown(f"**{number}.** {icons} {step['text']}")
 
             if result["warnings"]:
                 st.warning("  \n".join(result["warnings"]), icon="⚠️")

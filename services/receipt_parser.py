@@ -146,6 +146,9 @@ def parse_receipt(image_bytes):
         if unit not in UNITS:
             unit = None
 
+        if unit is None and name is not None:
+            unit = "pcs"
+
         items.append({
             "raw_text": raw_text,
             "ingredient_name": name,

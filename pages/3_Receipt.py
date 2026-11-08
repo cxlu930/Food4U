@@ -5,12 +5,14 @@ from hashlib import sha256
 from io import BytesIO
 
 from data.ingredients import UNITS
-from db import save_confirmed_receipt
+from db import require_user, save_confirmed_receipt
 
 from PIL import Image, UnidentifiedImageError
 import streamlit as st
 
 from services.receipt_parser import ingredient_catalog, parse_receipt, prepare_confirmation
+
+require_user()  # know who this is from the first moment, so "Back to Home" keeps the nickname
 
 st.page_link("app.py", label="← Back to Home")
 
@@ -66,7 +68,16 @@ with st.form(f"receipt_c_form_{receipt_id}"):
     purchase_date = st.date_input("Purchase date", value=date.fromisoformat(receipt["purchase_date"]), disabled=confirmed)
     total_price = st.number_input("Total price ($)", min_value=0.0, value=receipt["total_price"], step=0.01, disabled=confirmed)
     edited_items = st.data_editor(
-        items, key=f"receipt_c_items_{receipt_id}_{confirmed}", hide_index=True,
+        items,
+        column_order=[
+            "raw_text",
+            "ingredient_name",
+            "quantity",
+            "unit",
+            "price",
+        ],
+        key=f"receipt_c_items_{receipt_id}_{confirmed}",
+        hide_index=True,
         num_rows="fixed", disabled=True if confirmed else ["raw_text", "recognized"],
         column_config={
             "raw_text": st.column_config.TextColumn("Original receipt text"),
@@ -78,7 +89,6 @@ with st.form(f"receipt_c_form_{receipt_id}"):
                 required=False
             ),
             "price": st.column_config.NumberColumn("Price ($)", min_value=0.0, step=0.01, required=True),
-            "recognized": st.column_config.CheckboxColumn("Recognized (on confirmation)"),
         },
     )
     submitted = st.form_submit_button("Confirm Receipt", disabled=confirmed)
