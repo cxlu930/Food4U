@@ -6,7 +6,7 @@ from urllib.parse import quote
 import streamlit as st
 
 from data.ingredients import SPICE_LEVELS
-from db import current_user, get_preferences, get_spending_summary, init_db, sign_out
+from db import current_user, get_preferences, get_budget_summary, init_db, sign_out
 from services.recommender import get_recommendations, load_recipes
 
 st.set_page_config(page_title="Food4U", page_icon="🌿", layout="wide")
@@ -175,27 +175,44 @@ st.markdown("""
 .st-key-recommendation_details [role="radiogroup"] label:has(input:checked) { background:#eaf1cb; border-color:#b8d44f; }
 @media(max-width:760px) { .f4u .recipe-top { align-items:flex-start; flex-direction:column; } .f4u .recipe-result { padding:20px; } }
 
+.st-key-home_budget_view [role="radiogroup"] label {
+ border:1px solid #dedbd3; border-radius:999px; padding:7px 15px;
+}
+.st-key-home_budget_view [role="radiogroup"] label:has(input:checked) {
+ background:#D5E69B; border-color:#9DBD43;
+}
 </style>
 """, unsafe_allow_html=True)
 
 init_db()
 prefs = get_preferences() or {}
 nick_q = "?u=" + quote(current_user() or "")  # plain links reload the app, so they carry the nickname
-summary = get_spending_summary()
+with st.container(key="home_budget_view"):
+    budget_period = st.radio(
+        "Budget view", ["weekly", "monthly"],
+        index=["weekly", "monthly"].index(prefs["budget_period"]),
+        format_func=str.title, horizontal=True,
+        key=f"home_budget_period_{current_user()}_{prefs['budget_period']}",
+    )
+    st.caption("Choose a view here. Save your default period in Preferences.")
+summary = get_budget_summary(budget_period)
 spent = summary["spent"]
-budget = float(prefs["weekly_budget"])
-remaining = round(budget - spent, 2)
+budget = float(summary["budget"])
+remaining = summary["remaining"]
+period_label = budget_period.title()
+period_noun = "month" if budget_period == "monthly" else "week"
+period_dates = f"{summary['start_date']} – {summary['end_date']} · Vancouver"
 spice = prefs.get("spice_level")
 if spice is None:
     spice = 0
 
-daily_note = "No saved spending this week." if spent == 0 else "Spent this week · Saved receipts only"
+daily_note = f"No saved spending this {period_noun}." if spent == 0 else f"Spent this {period_noun} · Saved receipts only"
 if budget > 0:
     used_percent = spent / budget * 100
     filled_percent = min(max(used_percent, 0.0), 100.0)
     usage_label = f"Budget Used: {used_percent:.1f}% used"
     budget_progress = (
-        f'<div class="budget-track" role="progressbar" aria-label="Weekly budget used" '
+        f'<div class="budget-track" role="progressbar" aria-label="{period_label} budget used" '
         f'aria-valuemin="0" aria-valuemax="100" aria-valuenow="{filled_percent:.2f}" '
         f'aria-valuetext="{used_percent:.1f}% of budget used">'
         f'<div class="budget-fill" style="width:{filled_percent:.2f}%"></div></div>'
@@ -214,7 +231,7 @@ budget_warning = (
 
 preference_cards = ""
 for title, value, glyph in [
-    ("Budget", f"${budget:,.2f} CAD", "budget"),
+    ("Budget", f"${budget:,.2f} CAD / {period_noun}", "budget"),
     ("Cuisines", labels(prefs.get("cuisines")), "cuisine"),
     ("Spice Level", SPICE_LEVELS.get(spice, "Not specified").title(), "spice"),
     ("Flavors", labels(prefs.get("flavor")), "heart"),
@@ -235,9 +252,9 @@ st.html(f"""
   <div><h1>Good food.<br>A little more <span class="underline">ease.</span></h1><p class="intro">Turn your groceries, pantry, and budget<br>into meals you actually want to eat.</p></div>
   <img class="hero-art" src="{artwork('bowl')}" alt="Hand drawn noodle bowl with egg, tomatoes and greens">
  </section>
- <section class="stats" aria-label="Weekly spending overview">
-  <div class="stat"><div><h2>Daily Spending</h2><div class="amount">${spent:,.2f}</div><div class="stat-note">{daily_note}</div><div class="daily-empty">Daily breakdown unavailable — no daily chart yet.</div></div></div>
-  <a class="stat remaining-card{' is-over-budget' if remaining < 0 else ''}" href="./Preferences{nick_q}" target="_self" aria-label="Remaining Budget: edit budget in Preferences"><div><div class="stat-heading"><h2>Remaining Budget</h2>{icon('arrow')}</div><div class="amount">${remaining:,.2f}</div><div class="stat-note budget-usage"><span>Weekly budget: ${budget:,.2f}</span><span>{usage_label}</span></div>{budget_progress}{budget_warning}</div></a>
+ <section class="stats" aria-label="{period_label} spending overview">
+  <div class="stat"><div><h2>{"Monthly Spending" if budget_period == "monthly" else "Daily Spending"}</h2><div class="amount">${spent:,.2f}</div><div class="stat-note">{daily_note}</div><div class="daily-empty">{period_dates} · Daily breakdown unavailable.</div></div></div>
+  <a class="stat remaining-card{' is-over-budget' if remaining < 0 else ''}" href="./Preferences{nick_q}" target="_self" aria-label="Remaining Budget: edit budget in Preferences"><div><div class="stat-heading"><h2>Remaining Budget</h2>{icon('arrow')}</div><div class="amount">${remaining:,.2f}</div><div class="stat-note budget-usage"><span>{period_label} budget: ${budget:,.2f}</span><span>{usage_label}</span></div>{budget_progress}{budget_warning}</div></a>
  </section>
  <section class="features" aria-label="Your kitchen">
   <a class="feature receipt" href="./Receipt{nick_q}" target="_self" aria-label="Upload Receipt: open receipt upload page">
@@ -254,13 +271,14 @@ st.html(f"""
 """)
 
 if remaining < 0:
-    st.warning(f"You are ${abs(remaining):,.2f} over your weekly budget.")
+    st.warning(f"You are ${abs(remaining):,.2f} over your {period_label.lower()} budget.")
 
 with st.container(key="home_recommendation_row"):
     recommendation_column, explore_column = st.columns(2, gap="medium")
     with recommendation_column:
         with st.container(border=True, height="stretch", key="recommendation_details"):
             st.subheader("This Week’s Recommendation")
+            st.caption("Recipe recommendations currently use your weekly budget, including when the dashboard is in Monthly view.")
             mode_label = st.radio("Find something delicious", ["Plan my meals", "Cook with what I have"], horizontal=True)
             mode = "plan_my_meals" if mode_label == "Plan my meals" else "cook_with_what_i_have"
             recommendations = None
