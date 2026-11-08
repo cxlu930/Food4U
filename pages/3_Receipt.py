@@ -5,12 +5,14 @@ from hashlib import sha256
 from io import BytesIO
 
 from data.ingredients import UNITS
-from db import save_confirmed_receipt
+from db import require_user, save_confirmed_receipt
 
 from PIL import Image, UnidentifiedImageError
 import streamlit as st
 
 from services.receipt_parser import ingredient_catalog, parse_receipt, prepare_confirmation
+
+require_user()  # know who this is from the first moment, so "Back to Home" keeps the nickname
 
 st.page_link("app.py", label="← Back to Home")
 
