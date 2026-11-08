@@ -50,6 +50,9 @@ h3 { font-size: 30px !important; letter-spacing: -1px; }
 
 [data-testid="stNumberInput"] label p { font-size: 15px; font-weight: 700; }
 [data-testid="stNumberInput"] input { font-size: 20px; font-weight: 700; }
+[data-testid="stExpander"] details { border: 2px solid #111310; border-radius: 16px; background: #fdf9f2; }
+[data-testid="stExpander"] summary p { font-size: 15px; font-weight: 800; }
+.p-batch { font-size: 14px; font-weight: 700; margin: 4px 0 6px; }
 .stButton > button { border-radius: 999px; border: 2px solid #111310; color: #111310; background: #f1f4dc; font-size: 17px; font-weight: 800; padding: 0.5rem 1rem; }
 .stButton > button:hover { background: #f3d7a8; border-color: #111310; color: #111310; }
 [class*="st-key-update_"] button, [class*="st-key-update_"] button p { background: #111310; color: #fdf9f2; }
@@ -74,7 +77,7 @@ SECTIONS = [
 CATEGORY_EMOJI = {
     "vegetable": "🥬", "fruit": "🍎", "meat": "🍗", "seafood": "🐟", "egg": "🥚",
     "protein": "🫘", "dairy": "🧀", "grain": "🌾", "legume": "🫘", "canned": "🥫",
-    "condiment": "🧂", "spice": "🌶️", "oil": "🫒", "nut": "🥜", "sweet": "🍫",
+    "condiment": "🧂", "spice": "🌶️", "oil": "🫒", "nut": "🥜", "sweet": "🍫", "sweets": "🍫",
 }
 
 INGREDIENT_EMOJI = {
@@ -127,58 +130,117 @@ def freshness(item):
     return max(0.0, min(1.0, item["days_left"] / shelf_days))
 
 
-def render_card(item):
-    name = display_name(item)
-    unit = item["unit"] or ""
+# Units of the same kind can be added together. Everything else (pcs, bag, can ...) is never converted.
+TO_BASE = {"g": ("weight", 1), "kg": ("weight", 1000), "lb": ("weight", 453.592),
+           "ml": ("volume", 1), "L": ("volume", 1000)}
+BIG_UNIT = {"weight": ("g", "kg"), "volume": ("ml", "L")}
 
-    with st.container(border=True, key=f"pantry_card_{item['id']}"):
+
+def unit_family(unit):
+    return TO_BASE[unit][0] if unit in TO_BASE else (unit or "")
+
+
+def total_of(batches):
+    """(quantity, unit) for several batches of one ingredient."""
+    family = unit_family(batches[0]["unit"])
+    if family not in BIG_UNIT:  # same unit everywhere: just add up
+        return sum(b["quantity"] for b in batches), batches[0]["unit"] or ""
+    base = sum(b["quantity"] * TO_BASE[b["unit"]][1] for b in batches)
+    small, big = BIG_UNIT[family]
+    return (round(base / 1000, 2), big) if base >= 1000 else (round(base, 1), small)
+
+
+def group_items(items):
+    """One entry per ingredient (and kind of unit). Each keeps its batches, oldest reference date
+    first. The entry looks like its oldest batch (status, dates) but shows the total quantity."""
+    groups = {}
+    for item in items:  # get_pantry_items() returns the soonest reference date first
+        groups.setdefault((item["ingredient_name"], unit_family(item["unit"])), []).append(item)
+
+    result = []
+    for batches in groups.values():
+        if len(batches) == 1:  # one batch: show it exactly as it is, in its own unit
+            result.append({**batches[0], "batches": batches})
+        else:
+            quantity, unit = total_of(batches)
+            result.append({**batches[0], "quantity": quantity, "unit": unit, "batches": batches})
+    return result
+
+
+def render_controls(item, name, unit):
+    new_quantity = st.number_input(
+        f"Change quantity ({unit})" if unit else "Change quantity",
+        min_value=0.0,
+        value=float(item["quantity"]),
+        step=1.0,
+        format="%g",
+        key=f"qty_{item['id']}",
+    )
+
+    update_col, used_col = st.columns(2)
+    with update_col:
+        if st.button("Update", key=f"update_{item['id']}", use_container_width=True):
+            update_pantry_quantity(item["id"], new_quantity)
+            st.session_state["pantry_last"] = {
+                "message": f"Updated {name}: {item['quantity']:g} → {new_quantity:g} {unit}.",
+                "undo": (item["id"], item["quantity"]),
+                "undone": f"Undone: {name} is back to {item['quantity']:g} {unit}.",
+            }
+            st.rerun()
+    with used_col:
+        if st.button("Used up", key=f"used_{item['id']}", use_container_width=True):
+            update_pantry_quantity(item["id"], 0)
+            st.session_state["pantry_last"] = {
+                "message": f"{name} marked as used up.",
+                "undo": (item["id"], item["quantity"]),
+                "undone": f"Undone: {name} is back to {item['quantity']:g} {unit}.",
+            }
+            st.rerun()
+
+
+def render_card(group):
+    name = display_name(group)
+    unit = group["unit"] or ""
+    batches = group["batches"]
+    many = len(batches) > 1
+
+    qty_text = f'{group["quantity"]:g} {html.escape(unit)}' + (f" · {len(batches)} batches" if many else "")
+    dates = ("Oldest batch: " if many else "") + (
+        f'bought {group["purchase_date"]} · reference date {group["expiry_date"]}'
+    )
+
+    with st.container(border=True, key=f"pantry_card_{group['id']}"):
         st.markdown(
-            f'<div class="p-head"><div class="p-emoji">{emoji_for(item)}</div>'
+            f'<div class="p-head"><div class="p-emoji">{emoji_for(group)}</div>'
             f'<div><div class="p-name">{html.escape(str(name))}</div>'
-            f'<div class="p-qty">{item["quantity"]:g} {html.escape(unit)}</div></div></div>'
-            f'<div class="p-days"><span class="pill pill-{item["status"]}">{PILL_TEXT[item["status"]]}</span>'
-            f"{days_text(item['days_left'])}</div>"
-            f'<div class="p-dates">Bought {item["purchase_date"]} · reference date {item["expiry_date"]}</div>',
+            f'<div class="p-qty">{qty_text}</div></div></div>'
+            f'<div class="p-days"><span class="pill pill-{group["status"]}">{PILL_TEXT[group["status"]]}</span>'
+            f"{days_text(group['days_left'])}</div>"
+            f'<div class="p-dates">{dates[0].upper() + dates[1:]}</div>',
             unsafe_allow_html=True,
         )
 
-        left = freshness(item)
+        left = freshness(group)
         if left is not None:
             st.markdown(
-                f'<div class="p-bar-label">Freshness</div>'
+                f'<div class="p-bar-label">Freshness{" (oldest batch)" if many else ""}</div>'
                 f'<div class="p-bar"><div class="p-bar-fill" style="width:{left * 100:.0f}%"></div></div>',
                 unsafe_allow_html=True,
             )
 
-        new_quantity = st.number_input(
-            f"Change quantity ({unit})" if unit else "Change quantity",
-            min_value=0.0,
-            value=float(item["quantity"]),
-            step=1.0,
-            format="%g",
-            key=f"qty_{item['id']}",
-        )
-
-        update_col, used_col = st.columns(2)
-        with update_col:
-            if st.button("Update", key=f"update_{item['id']}", use_container_width=True):
-                update_pantry_quantity(item["id"], new_quantity)
-                st.session_state["pantry_last"] = {
-                    "message": f"Updated {name}: {item['quantity']:g} → {new_quantity:g} {unit}.",
-                    "undo": (item["id"], item["quantity"]),
-                    "undone": f"Undone: {name} is back to {item['quantity']:g} {unit}.",
-                }
-                st.rerun()
-        with used_col:
-            if st.button("Used up", key=f"used_{item['id']}", use_container_width=True):
-                update_pantry_quantity(item["id"], 0)
-                st.session_state["pantry_last"] = {
-                    "message": f"{name} marked as used up.",
-                    "undo": (item["id"], item["quantity"]),
-                    "undone": f"Undone: {name} is back to {item['quantity']:g} {unit}.",
-                }
-                st.rerun()
-
+        if not many:
+            render_controls(group, name, unit)
+        else:
+            with st.expander(f"Batches ({len(batches)})"):
+                for batch in batches:
+                    batch_unit = batch["unit"] or ""  # each batch keeps the unit it was bought in
+                    st.markdown(
+                        f'<div class="p-batch">{batch["quantity"]:g} {html.escape(batch_unit)} · '
+                        f'bought {batch["purchase_date"]} · reference date {batch["expiry_date"]} '
+                        f'({days_text(batch["days_left"])})</div>',
+                        unsafe_allow_html=True,
+                    )
+                    render_controls(batch, name, batch_unit)
 
 st.markdown('<div class="eyebrow">YOUR EVERYDAY KITCHEN</div>', unsafe_allow_html=True)
 st.title("Your pantry")
@@ -201,6 +263,9 @@ if not items:
     st.page_link("pages/3_Receipt.py", label="Upload a receipt →", icon="🧾")
     st.stop()
 
+groups = group_items(items)
+
+
 def set_filter(status):
     # clicking the selected tile again shows everything
     st.session_state["pantry_filter"] = None if st.session_state.get("pantry_filter") == status else status
@@ -208,10 +273,10 @@ def set_filter(status):
 
 wanted = st.session_state.get("pantry_filter")
 tiles = [
-    ("tile_all", f"**{len(items)}** In your pantry", None),
-    ("tile_fresh", f"**{sum(1 for i in items if i['status'] == 'fresh')}** Fresh", "fresh"),
-    ("tile_use_first", f"**{sum(1 for i in items if i['status'] == 'use_first')}** Use first", "use_first"),
-    ("tile_check", f"**{sum(1 for i in items if i['status'] == 'check_item')}** To check", "check_item"),
+    ("tile_all", f"**{len(groups)}** In your pantry", None),
+    ("tile_fresh", f"**{sum(1 for i in groups if i['status'] == 'fresh')}** Fresh", "fresh"),
+    ("tile_use_first", f"**{sum(1 for i in groups if i['status'] == 'use_first')}** Use first", "use_first"),
+    ("tile_check", f"**{sum(1 for i in groups if i['status'] == 'check_item')}** To check", "check_item"),
 ]
 for col, (key, label, status) in zip(st.columns([1.3, 1.3, 1.3, 1.3, 1.8], gap="small"), tiles):
     col.button(label, key=key, use_container_width=True,
@@ -224,19 +289,19 @@ shown = False
 for status, heading, note in SECTIONS:
     if wanted and status != wanted:
         continue
-    group = [i for i in items if i["status"] == status]
-    if not group:
+    cards = [g for g in groups if g["status"] == status]
+    if not cards:
         continue
 
     shown = True
-    st.subheader(f"{heading} · {len(group)}")
+    st.subheader(f"{heading} · {len(cards)}")
     if note:
         st.caption(note)
 
-    for start in range(0, len(group), 3):
-        for col, item in zip(st.columns(3, gap="medium"), group[start:start + 3]):
+    for start in range(0, len(cards), 3):
+        for col, group in zip(st.columns(3, gap="medium"), cards[start:start + 3]):
             with col:
-                render_card(item)
+                render_card(group)
 
 if not shown:
     st.info("Nothing here right now.")
