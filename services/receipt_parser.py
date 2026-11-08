@@ -52,23 +52,35 @@ def parse_receipt(image_bytes):
 
     mime_type = "image/jpeg" if image_format == "JPEG" else "image/png"
 
-    prompt = """
+    catalog = ingredient_catalog()
+
+    ingredient_options = [
+        {
+            "key": name,
+            "display_name": details["display_name"],
+            "aliases": details.get("aliases", [])
+        }
+        for name, details in catalog.items()
+    ]
+
+    prompt = f"""
     Extract grocery receipt information from this image.
 
     Return ONLY a valid JSON object with this structure:
-    {
+    {{
         "store": "Store name",
         "purchase_date": "YYYY-MM-DD",
         "total_price": 0.0,
         "items": [
-            {
-                "raw_text": "Original product name",
+            {{
+                "raw_text": "Original product name on receipt",
+                "ingredient_name": "standard_ingredient_key_or_null",
                 "quantity": 1.0,
                 "unit": "pcs",
                 "price": 0.0
-            }
+            }}
         ]
-    }
+    }}
 
     Rules:
     - Extract only products visible on the receipt.
@@ -77,6 +89,20 @@ def parse_receipt(image_bytes):
     - Use null for units that cannot be determined.
     - Use null for unknown dates or totals.
     - Return JSON only, without Markdown.
+
+    Ingredient matching rules:
+    - Match each receipt product to the most appropriate ingredient from the catalog below.
+    - Use the ingredient's standard "key" as ingredient_name.
+    - Consider product brands, abbreviations, varieties, and aliases.
+    - For example, "WF Large Eggs 18" should match "egg".
+    - For example, "W/P Chckn Drumsticks" should match "chicken".
+    - Only use keys that exist in the catalog.
+    - If there is no appropriate match, return null for ingredient_name.
+    - Do not invent new ingredient keys.
+    - Always preserve the original product name from the receipt in raw_text.
+
+    Ingredient catalog:
+    {json.dumps(ingredient_options)}
     """
 
     response = client.models.generate_content(
@@ -106,13 +132,20 @@ def parse_receipt(image_bytes):
 
     for item in data.get("items", []):
         raw_text = item.get("raw_text", "")
-        name = match_ingredient(raw_text)
+        name = item.get("ingredient_name")
+
+        if name not in catalog:
+            name = match_ingredient(raw_text)
+
+        unit = item.get("unit")
+        if unit not in UNITS:
+            unit = None
 
         items.append({
             "raw_text": raw_text,
             "ingredient_name": name,
             "quantity": item.get("quantity") or 1.0,
-            "unit": item.get("unit"),
+            "unit": unit,
             "price": item.get("price") or 0.0,
             "recognized": name is not None
         })
