@@ -6,7 +6,7 @@ from data.ingredients import INGREDIENTS
 DB_PATH = "food4u.db"
 
 # Demo only: fill an empty pantry with sample items. Set to False to turn it off.
-SEED_SAMPLE_DATA = True
+SEED_SAMPLE_DATA = False
 
 
 def get_connection():
