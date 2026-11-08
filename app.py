@@ -423,10 +423,12 @@ with st.container(key="home_recommendation_row"):
                       </div>
                     </details>
                     """)
-            else:
-                st.info("No recipe suggestions yet. Add pantry items or review your dietary preferences to find your next meal.")
-            if not results:
-                st.page_link("pages/2_Recipes.py", label="Recipe Recommendation →")
+            elif recommendations is not None:
+                st.caption(
+                    "Add groceries to your pantry to get started."
+                    if mode == "cook_with_what_i_have"
+                    else "No recipe suggestions yet. Review your dietary preferences to find your next meal."
+                )
 
     with explore_column:
         with st.container(border=True, key="explore_recipes"):
