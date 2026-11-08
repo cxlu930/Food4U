@@ -135,11 +135,8 @@ init_db()
 prefs = get_preferences() or {}
 summary = get_spending_summary()
 spent = summary["spent"]
-budget = prefs.get("weekly_budget")
-using_default_budget = budget is None or budget == 0
-if using_default_budget:
-    budget = 100.0
-remaining = budget - spent
+budget = float(prefs["weekly_budget"])
+remaining = round(budget - spent, 2)
 spice = prefs.get("spice_level")
 if spice is None:
     spice = 0
@@ -169,7 +166,7 @@ st.html(f"""
  </section>
  <section class="stats" aria-label="Weekly spending overview">
   <div class="stat"><div><h2>Daily Spending</h2><div class="amount">${spent:,.2f}</div><div class="stat-note">Spent this week · Chart illustrative only</div></div><span title="Decorative illustration, not spending data">{bars}</span></div>
-  <div class="stat"><div><h2>Remaining Budget</h2><div class="amount">${remaining:,.2f}</div><div class="stat-note">{'Using default weekly budget: $100' if using_default_budget else f'Weekly budget: ${budget:,.2f}'}</div></div><span title="Decorative illustration, not spending data">{line}</span></div>
+  <div class="stat"><div><h2>Remaining Budget</h2><div class="amount">${remaining:,.2f}</div><div class="stat-note">Weekly budget: ${budget:,.2f}</div></div><span title="Decorative illustration, not spending data">{line}</span></div>
  </section>
  <section class="features" aria-label="Your kitchen">
   <a class="feature receipt" href="./Receipt" target="_self" aria-label="Upload Receipt: open receipt upload page">
