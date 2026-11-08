@@ -104,7 +104,10 @@ def spice_text(level):
     return "🌶️" * level if level else "Not spicy"
 
 
-def render_card(result, favorites, mode):
+def render_card(result, favorites, mode=None):
+    """Draw one recipe card with a favorite heart.
+    `mode` is the recommendation mode; leave it None where there is no mode
+    (then missing ingredients always show as "Need to buy")."""
     recipe = result["recipe"]
     cuisine = recipe.get("cuisine", "")
     emoji = CUISINE_EMOJI.get(cuisine, "🍽️")
